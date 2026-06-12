@@ -510,6 +510,125 @@
     footer a { color: var(--ink-2); text-decoration: none; }
     footer a:hover { color: var(--accent); }
 
+    /* Phase 9 commit-2: wishlist matches panel. Gold-accented to draw the
+       eye -- this is the highest-action block on the page. Initials-only
+       customer labels keep the public URL safe to share. */
+    .match-panel {
+      border-left: 4px solid var(--gold);
+      background: linear-gradient(135deg, var(--bg-card) 0%, rgba(184, 134, 11, 0.04) 100%);
+      margin-bottom: 24px;
+    }
+    .match-title { color: var(--gold); }
+    .match-list { list-style: none; }
+    .match-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto minmax(0, 1.4fr);
+      gap: 12px;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .match-row:last-child { border-bottom: none; }
+    .match-who { min-width: 0; }
+    .match-initials {
+      display: inline-block;
+      background: var(--gold);
+      color: #fff;
+      font-weight: 700;
+      font-size: 12px;
+      letter-spacing: 0.04em;
+      padding: 3px 9px;
+      border-radius: 6px;
+      margin-right: 8px;
+      font-variant-numeric: tabular-nums;
+    }
+    .match-want {
+      color: var(--ink-2);
+      font-size: 14px;
+    }
+    .match-arrow {
+      color: var(--ink-3);
+      font-size: 16px;
+      font-weight: 600;
+    }
+    .match-car {
+      color: var(--ink);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 14px;
+      font-variant-numeric: tabular-nums;
+    }
+    a.match-car { color: var(--accent); }
+    a.match-car:hover { text-decoration: underline; }
+
+    /* Phase 9 commit-1: neglected customers panel. Lower-key than the
+       wishlist panel -- this is a "work through this list" block, not
+       "act on this NOW". Splits cold-engaged (always visible) from
+       never-contacted (collapsed by default to suppress the long tail). */
+    .neglect-panel { margin-top: 28px; }
+    .neglect-list { list-style: none; }
+    .neglect-row {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      padding: 9px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .neglect-row:last-child { border-bottom: none; }
+    .neglect-initials {
+      display: inline-block;
+      background: var(--bg-elev);
+      border: 1px solid var(--border);
+      color: var(--ink);
+      font-weight: 700;
+      font-size: 11px;
+      letter-spacing: 0.04em;
+      padding: 2px 8px;
+      border-radius: 5px;
+      flex-shrink: 0;
+    }
+    .neglect-row.neglect-never .neglect-initials {
+      color: var(--ink-3);
+      font-weight: 600;
+    }
+    .neglect-meta {
+      font-size: 13px;
+      color: var(--ink-2);
+      flex: 1;
+      min-width: 0;
+    }
+    .neglect-empty {
+      color: var(--ink-3);
+      font-size: 13px;
+      font-style: italic;
+      padding: 8px 0;
+    }
+    .neglect-never-wrap {
+      margin-top: 12px;
+      border-top: 1px solid var(--border);
+      padding-top: 12px;
+    }
+    .neglect-never-summary {
+      cursor: pointer;
+      font-size: 12px;
+      color: var(--ink-3);
+      letter-spacing: 0.02em;
+      padding: 4px 0;
+      list-style: none;
+    }
+    .neglect-never-summary::-webkit-details-marker { display: none; }
+    .neglect-never-summary::before {
+      content: "▸ ";
+      font-size: 10px;
+      color: var(--ink-3);
+      transition: transform 0.15s ease;
+      display: inline-block;
+    }
+    .neglect-never-wrap[open] .neglect-never-summary::before {
+      transform: rotate(90deg);
+    }
+    .neglect-never-summary:hover { color: var(--ink-2); }
+
     /* Snapshot-time preview banner */
     .preview-banner {
       background: var(--accent-soft);
@@ -536,6 +655,15 @@
       .card-cue { opacity: 0.85; }
       .removed-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
       .lineup { grid-template-columns: 1fr; }
+      /* Wishlist match row collapses to two stacked lines on phone -- the
+         3-column grid is too tight at 360px. */
+      .match-row {
+        grid-template-columns: 1fr;
+        gap: 4px;
+        padding: 14px 0;
+      }
+      .match-arrow { display: none; }
+      .match-car { font-size: 13px; }
     }
 
     @media (min-width: 1100px) {
@@ -546,13 +674,13 @@
 <body>
   <main class="container">
 
-    <div class="preview-banner">Static snapshot · 5:05 PM</div>
+    <div class="preview-banner">Static snapshot · 7:25 PM</div>
 
     <header>
       <div class="bebe" data-placeholder="true" aria-label="Bebe the yellow lab"></div>
       <div class="greeting">
         <h1>Good morning, Bud</h1>
-        <p class="date">Friday, June 12 · <span class="">Refreshed 10h ago</span></p>
+        <p class="date">Friday, June 12 · <span class="">Refreshed 12h ago</span></p>
       </div>
     </header>
 
@@ -566,17 +694,17 @@
       <ul class="reminders">
       <li class="reminder">
         <span class="reminder-check" aria-hidden="true"></span>
-        <span class="reminder-text">Call Sarah Chen about the 296 GTB</span>
+        <span class="reminder-text">Call top customer about the 296 GTB</span>
         <span class="reminder-time">10:00 AM</span>
       </li>
       <li class="reminder">
         <span class="reminder-check" aria-hidden="true"></span>
-        <span class="reminder-text">Follow up with Mike Rivera -- SF90 financing</span>
+        <span class="reminder-text">Follow up on SF90 financing</span>
         <span class="reminder-time">2:00 PM</span>
       </li>
       <li class="reminder">
         <span class="reminder-check" aria-hidden="true"></span>
-        <span class="reminder-text">Send Jim Bradshaw photos of the 488 Spider</span>
+        <span class="reminder-text">Send 488 Spider photos to interested customer</span>
         <span class="reminder-time">4:30 PM</span>
       </li></ul>
     </section>
@@ -586,6 +714,55 @@
       <div class="count-label">Cars for sale</div>
     </section>
     </div>
+
+    
+    <section class="panel match-panel">
+      <header class="panel-head">
+        <h2 class="panel-title match-title">Wishlist matches</h2>
+        <span class="panel-meta">5 new arrivals fit a customer's preference</span>
+      </header>
+      <ul class="match-list">
+      <li class="match-row">
+        <div class="match-who">
+          <span class="match-initials">J. B.</span>
+          <span class="match-want">wanted 296</span>
+        </div>
+        <div class="match-arrow" aria-hidden="true">→</div>
+        <a class="match-car" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2025-ferrari-296-gts-rwd-2d-convertible-zff01sma8s0320277/" target="_blank" rel="noopener noreferrer">2025 296 GTS · Bianco Avus · $429,995</a>
+      </li>
+      <li class="match-row">
+        <div class="match-who">
+          <span class="match-initials">J. B.</span>
+          <span class="match-want">wanted 296</span>
+        </div>
+        <div class="match-arrow" aria-hidden="true">→</div>
+        <a class="match-car" href="https://palmbeach.ferraridealers.com/en-US/296-speciale-a" target="_blank" rel="noopener noreferrer">Ferrari 296 Speciale A</a>
+      </li>
+      <li class="match-row">
+        <div class="match-who">
+          <span class="match-initials">J. B.</span>
+          <span class="match-want">wanted 296</span>
+        </div>
+        <div class="match-arrow" aria-hidden="true">→</div>
+        <a class="match-car" href="https://palmbeach.ferraridealers.com/en-US/296-gtb" target="_blank" rel="noopener noreferrer">Ferrari 296 GTB</a>
+      </li>
+      <li class="match-row">
+        <div class="match-who">
+          <span class="match-initials">J. B.</span>
+          <span class="match-want">wanted 296</span>
+        </div>
+        <div class="match-arrow" aria-hidden="true">→</div>
+        <a class="match-car" href="https://palmbeach.ferraridealers.com/en-US/296-gts" target="_blank" rel="noopener noreferrer">Ferrari 296 GTS</a>
+      </li>
+      <li class="match-row">
+        <div class="match-who">
+          <span class="match-initials">J. B.</span>
+          <span class="match-want">wanted 296</span>
+        </div>
+        <div class="match-arrow" aria-hidden="true">→</div>
+        <a class="match-car" href="https://palmbeach.ferraridealers.com/en-US/296-speciale" target="_blank" rel="noopener noreferrer">Ferrari 296 Speciale</a>
+      </li></ul>
+    </section>
 
     <h2 class="section-title">On the lot <span class="count">20 cars · 14 models</span></h2>
 
@@ -662,14 +839,14 @@
         <div class="card-photo">
           <span class="card-model">488 GTB</span>
           <span class="card-year">2019</span>
-          <div class="card-badges"><span class="badge badge-new" title="On lot 0d">NEW</span></div>
+          <div class="card-badges"><span class="badge badge-new" title="On lot 1d">NEW</span></div>
           <img class="card-photo-img" src="https://vehicle-images.carscommerce.inc/f0a4-110007612/ZFF79ALA7K0239502/074ea15ed9a5af0283a1c2099a560730.webp" alt="2019 488 GTB" loading="lazy">
           <span class="card-cue">View listing ↗</span>
         </div>
         <div class="card-body">
           <p class="card-meta">Rosso Mugello · 4,315 mi</p>
           <p class="card-price">$314,995</p>
-          <p class="card-tag">new today · CPO</p>
+          <p class="card-tag">1d on lot · CPO</p>
         </div>
       </a>
     </article>
@@ -694,14 +871,14 @@
         <div class="card-photo">
           <span class="card-model">488 Pista</span>
           <span class="card-year">2020</span>
-          <div class="card-badges"><span class="badge badge-new" title="On lot 0d">NEW</span></div>
+          <div class="card-badges"><span class="badge badge-new" title="On lot 1d">NEW</span></div>
           <img class="card-photo-img" src="https://vehicle-images.carscommerce.inc/ec91-110007612/ZFF91HLA0L0249818/698148573042318d01947bef02901a02.webp" alt="2020 488 Pista" loading="lazy">
           <span class="card-cue">View listing ↗</span>
         </div>
         <div class="card-body">
           <p class="card-meta">Nero / Rosso Ferrari · 6,870 mi</p>
           <p class="card-price">$949,195</p>
-          <p class="card-tag">new today · CPO</p>
+          <p class="card-tag">1d on lot · CPO</p>
         </div>
       </a>
     </article>
@@ -710,14 +887,14 @@
         <div class="card-photo">
           <span class="card-model">488 Pista</span>
           <span class="card-year">2020</span>
-          <div class="card-badges"><span class="badge badge-new" title="On lot 0d">NEW</span></div>
+          <div class="card-badges"><span class="badge badge-new" title="On lot 1d">NEW</span></div>
           <img class="card-photo-img" src="https://vehicle-images.carscommerce.inc/ec91-110007612/ZFF90HLA0L0249818/698148573042318d01947bef02901a02.webp" alt="2020 488 Pista" loading="lazy">
           <span class="card-cue">View listing ↗</span>
         </div>
         <div class="card-body">
           <p class="card-meta">Rosso Fuoco · 6,870 mi</p>
           <p class="card-price">$949,195</p>
-          <p class="card-tag">new today · CPO</p>
+          <p class="card-tag">1d on lot · CPO</p>
         </div>
       </a>
     </article>
@@ -790,14 +967,14 @@
         <div class="card-photo">
           <span class="card-model">F12 TDF</span>
           <span class="card-year">2017</span>
-          <div class="card-badges"><span class="badge badge-new" title="On lot 0d">NEW</span><span class="badge badge-c" title="Stock matches last 8 of VIN">C</span></div>
+          <div class="card-badges"><span class="badge badge-new" title="On lot 1d">NEW</span><span class="badge badge-c" title="Stock matches last 8 of VIN">C</span></div>
           <img class="card-photo-img" src="https://vehicle-images.carscommerce.inc/1718-110007612/ZFF81BFA7H0224245/b74b6ce1e773c3ec37ba234f14d6be26.webp" alt="2017 F12 TDF" loading="lazy">
           <span class="card-cue">View listing ↗</span>
         </div>
         <div class="card-body">
           <p class="card-meta">Giallo Triplo Strato · 2,576 mi</p>
           <p class="card-price">$3,499,995</p>
-          <p class="card-tag">new today · CPO</p>
+          <p class="card-tag">1d on lot · CPO</p>
         </div>
       </a>
     </article>
@@ -886,14 +1063,14 @@
         <div class="card-photo">
           <span class="card-model">Roma</span>
           <span class="card-year">2025</span>
-          <div class="card-badges"><span class="badge badge-new" title="On lot 0d">NEW</span></div>
+          <div class="card-badges"><span class="badge badge-new" title="On lot 1d">NEW</span></div>
           <img class="card-photo-img" src="https://vehicle-images.carscommerce.inc/8457-110007612/ZFF09RPA9S0317692/f20c22237211e70f5661319521024b9d.webp" alt="2025 Roma" loading="lazy">
           <span class="card-cue">View listing ↗</span>
         </div>
         <div class="card-body">
           <p class="card-meta">Giallo Modena · 84 mi</p>
           <p class="card-price">$309,895</p>
-          <p class="card-tag">new today · CPO</p>
+          <p class="card-tag">1d on lot · CPO</p>
         </div>
       </a>
     </article>
@@ -914,6 +1091,119 @@
       </a>
     </article>
     </div>
+
+    
+    <section class="panel neglect-panel">
+      <header class="panel-head">
+        <h2 class="panel-title">Haven't touched in 60+ days</h2>
+        <span class="panel-meta">0 cold contacts · 25 never logged</span>
+      </header>
+      <p class="neglect-empty">No previously-engaged customers are past the 60-day cold threshold yet.</p>
+      <details class="neglect-never-wrap">
+        <summary class="neglect-never-summary">25 customers have no interactions on record yet</summary>
+        <ul class="neglect-list">
+      <li class="neglect-row neglect-never">
+        <span class="neglect-initials">S. T.</span>
+        <span class="neglect-meta">no interaction on record</span>
+      </li>
+      <li class="neglect-row neglect-never">
+        <span class="neglect-initials">A. L.</span>
+        <span class="neglect-meta">no interaction on record</span>
+      </li>
+      <li class="neglect-row neglect-never">
+        <span class="neglect-initials">F. V.</span>
+        <span class="neglect-meta">no interaction on record</span>
+      </li>
+      <li class="neglect-row neglect-never">
+        <span class="neglect-initials">R. B.</span>
+        <span class="neglect-meta">no interaction on record</span>
+      </li>
+      <li class="neglect-row neglect-never">
+        <span class="neglect-initials">A. A.</span>
+        <span class="neglect-meta">no interaction on record</span>
+      </li>
+      <li class="neglect-row neglect-never">
+        <span class="neglect-initials">C. W.</span>
+        <span class="neglect-meta">no interaction on record</span>
+      </li>
+      <li class="neglect-row neglect-never">
+        <span class="neglect-initials">K. M.</span>
+        <span class="neglect-meta">no interaction on record</span>
+      </li>
+      <li class="neglect-row neglect-never">
+        <span class="neglect-initials">J. R.</span>
+        <span class="neglect-meta">no interaction on record</span>
+      </li>
+      <li class="neglect-row neglect-never">
+        <span class="neglect-initials">L. S.</span>
+        <span class="neglect-meta">no interaction on record</span>
+      </li>
+      <li class="neglect-row neglect-never">
+        <span class="neglect-initials">M. L.</span>
+        <span class="neglect-meta">no interaction on record</span>
+      </li>
+      <li class="neglect-row neglect-never">
+        <span class="neglect-initials">R. G.</span>
+        <span class="neglect-meta">no interaction on record</span>
+      </li>
+      <li class="neglect-row neglect-never">
+        <span class="neglect-initials">W. J. W.</span>
+        <span class="neglect-meta">no interaction on record</span>
+      </li>
+      <li class="neglect-row neglect-never">
+        <span class="neglect-initials">T. V.</span>
+        <span class="neglect-meta">no interaction on record</span>
+      </li>
+      <li class="neglect-row neglect-never">
+        <span class="neglect-initials">K. P.</span>
+        <span class="neglect-meta">no interaction on record</span>
+      </li>
+      <li class="neglect-row neglect-never">
+        <span class="neglect-initials">E. L.</span>
+        <span class="neglect-meta">no interaction on record</span>
+      </li>
+      <li class="neglect-row neglect-never">
+        <span class="neglect-initials">J. R.</span>
+        <span class="neglect-meta">no interaction on record</span>
+      </li>
+      <li class="neglect-row neglect-never">
+        <span class="neglect-initials">R. H. R.</span>
+        <span class="neglect-meta">no interaction on record</span>
+      </li>
+      <li class="neglect-row neglect-never">
+        <span class="neglect-initials">R. S.</span>
+        <span class="neglect-meta">no interaction on record</span>
+      </li>
+      <li class="neglect-row neglect-never">
+        <span class="neglect-initials">R. F.</span>
+        <span class="neglect-meta">no interaction on record</span>
+      </li>
+      <li class="neglect-row neglect-never">
+        <span class="neglect-initials">A. W.</span>
+        <span class="neglect-meta">no interaction on record</span>
+      </li>
+      <li class="neglect-row neglect-never">
+        <span class="neglect-initials">L. C.</span>
+        <span class="neglect-meta">no interaction on record</span>
+      </li>
+      <li class="neglect-row neglect-never">
+        <span class="neglect-initials">W. M.</span>
+        <span class="neglect-meta">no interaction on record</span>
+      </li>
+      <li class="neglect-row neglect-never">
+        <span class="neglect-initials">A. S.</span>
+        <span class="neglect-meta">no interaction on record</span>
+      </li>
+      <li class="neglect-row neglect-never">
+        <span class="neglect-initials">D. H.</span>
+        <span class="neglect-meta">no interaction on record</span>
+      </li>
+      <li class="neglect-row neglect-never">
+        <span class="neglect-initials">T.</span>
+        <span class="neglect-meta">no interaction on record</span>
+      </li></ul>
+      </details>
+    </section>
 
     
     <h2 class="section-title">Sold or pulled <span class="count">last 7 days · 12</span></h2>
