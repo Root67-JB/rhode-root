@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>About Rhode Root — Independent Software Developer</title>
+  <meta name="description" content="Rhode Root is an independent software developer building voice-first productivity tools for individual professionals.">
+  <style>
+    :root {
+      --ink: #1a1a1a;
+      --muted: #5a5a5a;
+      --accent: #c1272d;
+      --bg: #fafafa;
+      --card: #ffffff;
+      --border: #e5e5e5;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.6;
+    }
+    .container {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 48px 24px;
+    }
+    header {
+      margin-bottom: 48px;
+      padding-bottom: 24px;
+      border-bottom: 2px solid var(--accent);
+    }
+    .brand {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--ink);
+      margin: 0 0 4px;
+    }
+    .tagline {
+      font-size: 16px;
+      color: var(--muted);
+      margin: 0;
+    }
+    h2 {
+      font-size: 20px;
+      margin: 40px 0 12px;
+      color: var(--ink);
+    }
+    p { margin: 0 0 16px; color: var(--ink); }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 24px;
+      margin: 16px 0;
+    }
+    ul { margin: 0 0 16px; padding-left: 20px; }
+    li { margin-bottom: 8px; }
+    .contact {
+      margin-top: 48px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+      font-size: 14px;
+      color: var(--muted);
+    }
+    .contact a { color: var(--accent); text-decoration: none; }
+    .contact a:hover { text-decoration: underline; }
+    footer {
+      margin-top: 32px;
+      font-size: 13px;
+      color: var(--muted);
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1 class="brand">Rhode Root</h1>
+      <p class="tagline">Independent software developer. Voice-first productivity tools for individual professionals.</p>
+    </header>
+
+    <h2>About</h2>
+    <p>Rhode Root is a sole-proprietor software developer based in the United States, building custom productivity software for individual professionals. The current focus is voice-first iOS applications that help working professionals manage their daily workflow hands-free.</p>
+
+    <h2>Current product: Sales Assistant</h2>
+    <p>Sales Assistant is a voice-first iOS application built and operated by Rhode Root for a single end user (a salesperson at a luxury automotive dealership). The salesperson speaks naturally to the app to look up customer information, log interactions, schedule follow-ups, and receive timely reminders about pending tasks.</p>
+
+    <div class="card">
+      <ul>
+        <li><strong>Voice conversation:</strong> The end user talks to the app via Apple-secured voice channels. The app understands sales-specific context and performs actions on their behalf.</li>
+        <li><strong>Customer + inventory lookup:</strong> Voice queries surface customer history, vehicle inventory, prior conversations, and scheduled appointments.</li>
+        <li><strong>Task management:</strong> Tasks created during a voice session are tracked in a personal database tied to the end user's authenticated account.</li>
+        <li><strong>SMS reminders:</strong> When a task becomes due, the system sends a text-message reminder to the end user's own verified phone number so they don't miss follow-ups while away from the app.</li>
+      </ul>
+    </div>
+
+    <h2>Who Rhode Root serves</h2>
+    <p>Current operations consist of a single deployed instance serving one authenticated end user. The application does not send messages to customers, prospects, or third parties. All SMS traffic is account-internal — reminders go only to the end user's own pre-verified phone number, which is configured during initial app setup.</p>
+
+    <h2>Privacy &amp; data handling</h2>
+    <div class="card">
+      <ul>
+        <li>End-user data is stored encrypted at rest in a managed Postgres database.</li>
+        <li>Personally identifiable information is column-encrypted using AES-256 with a separately-managed key.</li>
+        <li>Voice sessions are processed via Apple-authenticated channels; no third-party voice training or analytics.</li>
+        <li>SMS reminders contain only task titles and (optionally) a customer first name; no financial, medical, or other sensitive data is ever transmitted over SMS.</li>
+      </ul>
+    </div>
+
+    <h2>SMS message types</h2>
+    <p>Rhode Root sends one type of SMS message: <strong>task reminders</strong> from the Sales Assistant application to the end user's own phone number. Example message bodies:</p>
+    <div class="card">
+      <p style="font-family: monospace; margin: 4px 0;">Task due: Follow up with John Smith</p>
+      <p style="font-family: monospace; margin: 4px 0;">Task due: Send proposal to Mary Lee</p>
+      <p style="font-family: monospace; margin: 4px 0;">Task due: Confirm Wednesday appointment</p>
+    </div>
+    <p>Recipients can opt out at any time by replying <strong>STOP</strong> to any message, or by removing the underlying task from their task list within the application.</p>
+
+    <h2>SMS opt-in flow</h2>
+    <p>The end user opts in to SMS reminders during initial setup of the Sales Assistant iOS application. The opt-in flow:</p>
+    <ol>
+      <li>End user installs the iOS application from Apple TestFlight (private distribution).</li>
+      <li>End user signs in with their Apple ID and is authenticated against an allowlist.</li>
+      <li>End user enters their personal phone number in app settings; the number is then pre-verified in the Twilio sender account before any messages can be sent.</li>
+      <li>SMS reminders are generated only from tasks the end user has personally created in the app via voice or manual entry.</li>
+      <li>Recipients can opt out by replying STOP, or by removing the task from their task list.</li>
+    </ol>
+
+    <div class="contact">
+      <p><strong>Business name:</strong> Rhode Root (sole proprietor)</p>
+      <p><strong>Contact email:</strong> <a href="mailto:rhode.root@gmail.com">rhode.root@gmail.com</a></p>
+      <p><strong>Business address:</strong> Available upon written request via the contact email above.</p>
+    </div>
+
+    <footer>
+      &copy; 2026 Rhode Root. All rights reserved.
+    </footer>
+  </div>
+</body>
+</html>

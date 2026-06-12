@@ -3,141 +3,483 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Rhode Root — Independent Software Developer</title>
-  <meta name="description" content="Rhode Root is an independent software developer building voice-first productivity tools for individual professionals.">
+  <title>Bud's Dashboard — Sales Assistant</title>
+  <meta name="description" content="Daily inventory + customer dashboard for Bud at Palm Beach Ferrari. Companion to the voice-first iOS Sales Assistant app.">
+  <meta name="robots" content="noindex, nofollow">
   <style>
     :root {
       --ink: #1a1a1a;
       --muted: #5a5a5a;
+      --soft: #888;
       --accent: #c1272d;
+      --accent-soft: #f8e5e6;
       --bg: #fafafa;
       --card: #ffffff;
       --border: #e5e5e5;
+      --gold: #b8860b;
     }
     * { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; }
     body {
       margin: 0;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
       background: var(--bg);
       color: var(--ink);
-      line-height: 1.6;
+      line-height: 1.55;
+      font-size: 17px;
     }
     .container {
-      max-width: 760px;
+      max-width: 1080px;
       margin: 0 auto;
-      padding: 48px 24px;
+      padding: 24px 20px 64px;
     }
+
+    /* Header with Bebe */
     header {
-      margin-bottom: 48px;
-      padding-bottom: 24px;
-      border-bottom: 2px solid var(--accent);
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 32px;
+      padding-bottom: 20px;
+      border-bottom: 3px solid var(--accent);
     }
-    .brand {
+    .bebe {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #f4d76e 0%, #d4a73a 100%);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 36px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .bebe[data-placeholder="true"]::after { content: "🐕"; }
+    .greeting { flex: 1; min-width: 0; }
+    .greeting h1 {
       font-size: 28px;
       font-weight: 700;
-      color: var(--ink);
-      margin: 0 0 4px;
+      margin: 0 0 2px;
     }
-    .tagline {
+    .greeting .date {
       font-size: 16px;
       color: var(--muted);
       margin: 0;
     }
-    h2 {
-      font-size: 20px;
-      margin: 40px 0 12px;
-      color: var(--ink);
+
+    /* Snapshot — 4 big numbers */
+    .snapshot {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 40px;
     }
-    p { margin: 0 0 16px; color: var(--ink); }
-    .card {
+    .stat {
       background: var(--card);
       border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 24px;
-      margin: 16px 0;
+      border-radius: 12px;
+      padding: 20px 12px;
+      text-align: center;
     }
-    ul { margin: 0 0 16px; padding-left: 20px; }
-    li { margin-bottom: 8px; }
-    .contact {
-      margin-top: 48px;
-      padding-top: 24px;
-      border-top: 1px solid var(--border);
+    .stat .num {
+      font-size: 44px;
+      font-weight: 700;
+      line-height: 1;
+      margin: 0 0 6px;
+      color: var(--ink);
+      font-variant-numeric: tabular-nums;
+    }
+    .stat .num.accent { color: var(--accent); }
+    .stat .num.gold { color: var(--gold); }
+    .stat .label {
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--soft);
+      margin: 0;
+    }
+
+    /* Section heading */
+    h2 {
       font-size: 14px;
-      color: var(--muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--soft);
+      margin: 32px 0 14px;
+      font-weight: 700;
     }
-    .contact a { color: var(--accent); text-decoration: none; }
-    .contact a:hover { text-decoration: underline; }
-    footer {
-      margin-top: 32px;
+
+    /* Inventory grid */
+    .inv-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 14px;
+    }
+    .inv-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      transition: box-shadow 0.15s ease;
+      cursor: default;
+    }
+    .inv-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+    .inv-photo {
+      aspect-ratio: 16 / 10;
+      background: linear-gradient(135deg, #1a1a1a 0%, #3a3a3a 100%);
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: rgba(255,255,255,0.6);
+      font-size: 14px;
+    }
+    .inv-photo.r {
+      background: linear-gradient(135deg, #8b0000 0%, #c1272d 100%);
+    }
+    .inv-photo.y {
+      background: linear-gradient(135deg, #b8860b 0%, #f4d76e 100%);
+    }
+    .inv-photo.b {
+      background: linear-gradient(135deg, #1a3a5a 0%, #4a7ba8 100%);
+    }
+    .inv-photo.g {
+      background: linear-gradient(135deg, #2a2a2a 0%, #6a6a6a 100%);
+    }
+    .inv-photo.w {
+      background: linear-gradient(135deg, #f0f0f0 0%, #d8d8d8 100%);
+      color: rgba(0,0,0,0.4);
+    }
+    .star {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: rgba(255,255,255,0.95);
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+    }
+    .pending {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      background: var(--accent);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      padding: 4px 8px;
+      border-radius: 4px;
+    }
+    .inv-body { padding: 14px 16px 16px; }
+    .inv-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin: 0 0 4px;
+      color: var(--ink);
+    }
+    .inv-meta {
       font-size: 13px;
       color: var(--muted);
+      margin: 0 0 8px;
+    }
+    .inv-price {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--ink);
+      margin: 0;
+      font-variant-numeric: tabular-nums;
+    }
+    .inv-tag {
+      display: inline-block;
+      font-size: 11px;
+      color: var(--soft);
+      margin-top: 4px;
+    }
+
+    /* Reminders */
+    .reminders { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 8px 4px; }
+    .rem-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .rem-item:last-child { border-bottom: none; }
+    .rem-checkbox {
+      width: 22px;
+      height: 22px;
+      border: 2px solid var(--border);
+      border-radius: 5px;
+      flex-shrink: 0;
+    }
+    .rem-text { flex: 1; font-size: 16px; }
+    .rem-time { font-size: 13px; color: var(--soft); }
+
+    /* Customer search */
+    .search-box {
+      width: 100%;
+      padding: 16px 20px;
+      font-size: 18px;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      background: var(--card);
+      color: var(--ink);
+      font-family: inherit;
+      transition: border-color 0.15s ease;
+    }
+    .search-box:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+    .search-box::placeholder { color: var(--soft); }
+
+    /* Recent interactions */
+    .interactions { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 8px 4px; }
+    .int-item {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .int-item:last-child { border-bottom: none; }
+    .int-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 4px;
+    }
+    .int-name { font-size: 16px; font-weight: 600; }
+    .int-time { font-size: 13px; color: var(--soft); white-space: nowrap; }
+    .int-snippet { font-size: 14px; color: var(--muted); margin: 0; }
+
+    /* Footer */
+    footer {
+      margin-top: 64px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+      font-size: 13px;
+      color: var(--soft);
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    footer a { color: var(--muted); text-decoration: none; }
+    footer a:hover { color: var(--accent); text-decoration: underline; }
+
+    /* Preview banner */
+    .preview-banner {
+      background: var(--accent-soft);
+      border: 1px solid var(--accent);
+      border-radius: 8px;
+      padding: 10px 16px;
+      margin-bottom: 24px;
+      font-size: 14px;
+      color: var(--accent);
       text-align: center;
+    }
+    .preview-banner strong { font-weight: 700; }
+
+    /* Mobile tweaks */
+    @media (max-width: 640px) {
+      .container { padding: 16px 16px 48px; }
+      .greeting h1 { font-size: 22px; }
+      .greeting .date { font-size: 14px; }
+      .bebe { width: 64px; height: 64px; font-size: 28px; }
+      .snapshot { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+      .stat { padding: 16px 8px; }
+      .stat .num { font-size: 36px; }
+      .inv-grid { grid-template-columns: 1fr; }
+    }
+
+    /* Auto dark mode */
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --ink: #f0f0f0;
+        --muted: #b0b0b0;
+        --soft: #888;
+        --bg: #0f0f0f;
+        --card: #1a1a1a;
+        --border: #2a2a2a;
+        --accent-soft: #3a1416;
+      }
+      .inv-photo.w { color: rgba(255,255,255,0.6); }
     }
   </style>
 </head>
 <body>
   <div class="container">
+
+    <div class="preview-banner">
+      <strong>Preview only —</strong> this is a layout mock-up. Real data + sign-in arrive in the next build.
+    </div>
+
     <header>
-      <h1 class="brand">Rhode Root</h1>
-      <p class="tagline">Independent software developer. Voice-first productivity tools for individual professionals.</p>
+      <div class="bebe" data-placeholder="true" aria-label="Bebe the yellow lab"></div>
+      <div class="greeting">
+        <h1>Good morning, Bud</h1>
+        <p class="date">Friday, June 13 · 7:00 AM</p>
+      </div>
     </header>
 
-    <h2>About</h2>
-    <p>Rhode Root is a sole-proprietor software developer based in the United States, building custom productivity software for individual professionals. The current focus is voice-first iOS applications that help working professionals manage their daily workflow hands-free.</p>
-
-    <h2>Current product: Sales Assistant</h2>
-    <p>Sales Assistant is a voice-first iOS application built and operated by Rhode Root for a single end user (a salesperson at a luxury automotive dealership). The salesperson speaks naturally to the app to look up customer information, log interactions, schedule follow-ups, and receive timely reminders about pending tasks.</p>
-
-    <div class="card">
-      <ul>
-        <li><strong>Voice conversation:</strong> The end user talks to the app via Apple-secured voice channels. The app understands sales-specific context and performs actions on their behalf.</li>
-        <li><strong>Customer + inventory lookup:</strong> Voice queries surface customer history, vehicle inventory, prior conversations, and scheduled appointments.</li>
-        <li><strong>Task management:</strong> Tasks created during a voice session are tracked in a personal database tied to the end user's authenticated account.</li>
-        <li><strong>SMS reminders:</strong> When a task becomes due, the system sends a text-message reminder to the end user's own verified phone number so they don't miss follow-ups while away from the app.</li>
-      </ul>
+    <div class="snapshot">
+      <div class="stat">
+        <p class="num">32</p>
+        <p class="label">On Lot</p>
+      </div>
+      <div class="stat">
+        <p class="num accent">+1</p>
+        <p class="label">Added Today</p>
+      </div>
+      <div class="stat">
+        <p class="num">5</p>
+        <p class="label">Sold / Pulled</p>
+      </div>
+      <div class="stat">
+        <p class="num gold">2</p>
+        <p class="label">Sale Pending</p>
+      </div>
     </div>
 
-    <h2>Who Rhode Root serves</h2>
-    <p>Current operations consist of a single deployed instance serving one authenticated end user. The application does not send messages to customers, prospects, or third parties. All SMS traffic is account-internal — reminders go only to the end user's own pre-verified phone number, which is configured during initial app setup.</p>
+    <h2>Inventory</h2>
+    <div class="inv-grid">
 
-    <h2>Privacy &amp; data handling</h2>
-    <div class="card">
-      <ul>
-        <li>End-user data is stored encrypted at rest in a managed Postgres database.</li>
-        <li>Personally identifiable information is column-encrypted using AES-256 with a separately-managed key.</li>
-        <li>Voice sessions are processed via Apple-authenticated channels; no third-party voice training or analytics.</li>
-        <li>SMS reminders contain only task titles and (optionally) a customer first name; no financial, medical, or other sensitive data is ever transmitted over SMS.</li>
-      </ul>
+      <div class="inv-card">
+        <div class="inv-photo r">
+          <span class="star">⭐</span>
+          [photo]
+        </div>
+        <div class="inv-body">
+          <h3 class="inv-title">2025 Ferrari 296 GTB</h3>
+          <p class="inv-meta">Rosso Corsa · 54 mi · CPO</p>
+          <p class="inv-price">$368,895</p>
+          <p class="inv-tag">2d on lot · — C</p>
+        </div>
+      </div>
+
+      <div class="inv-card">
+        <div class="inv-photo y">
+          [photo]
+        </div>
+        <div class="inv-body">
+          <h3 class="inv-title">2024 Ferrari SF90 Spider</h3>
+          <p class="inv-meta">Giallo Modena · 1,200 mi · CPO</p>
+          <p class="inv-price">$620,000</p>
+          <p class="inv-tag">18d on lot · — C</p>
+        </div>
+      </div>
+
+      <div class="inv-card">
+        <div class="inv-photo b">
+          <span class="pending">PENDING</span>
+          [photo]
+        </div>
+        <div class="inv-body">
+          <h3 class="inv-title">2023 Ferrari Portofino M</h3>
+          <p class="inv-meta">Blu America · 4,500 mi · CPO</p>
+          <p class="inv-price">$295,000</p>
+          <p class="inv-tag">21d on lot</p>
+        </div>
+      </div>
+
+      <div class="inv-card">
+        <div class="inv-photo g">
+          <span class="star">⭐</span>
+          [photo]
+        </div>
+        <div class="inv-body">
+          <h3 class="inv-title">2025 Ferrari 12Cilindri</h3>
+          <p class="inv-meta">Grigio Silverstone · 12 mi · CPO</p>
+          <p class="inv-price">$485,000</p>
+          <p class="inv-tag">3d on lot · — C</p>
+        </div>
+      </div>
+
+      <div class="inv-card">
+        <div class="inv-photo w">
+          [photo]
+        </div>
+        <div class="inv-body">
+          <h3 class="inv-title">2022 Ferrari Roma</h3>
+          <p class="inv-meta">Bianco Avus · 6,800 mi · CPO</p>
+          <p class="inv-price">$235,000</p>
+          <p class="inv-tag">31d on lot</p>
+        </div>
+      </div>
+
+      <div class="inv-card">
+        <div class="inv-photo r">
+          [photo]
+        </div>
+        <div class="inv-body">
+          <h3 class="inv-title">2018 Ferrari 488 Spider</h3>
+          <p class="inv-meta">Giallo Modena · 8,200 mi · Used</p>
+          <p class="inv-price">$235,000</p>
+          <p class="inv-tag">7d on lot</p>
+        </div>
+      </div>
+
     </div>
 
-    <h2>SMS message types</h2>
-    <p>Rhode Root sends one type of SMS message: <strong>task reminders</strong> from the Sales Assistant application to the end user's own phone number. Example message bodies:</p>
-    <div class="card">
-      <p style="font-family: monospace; margin: 4px 0;">Task due: Follow up with John Smith</p>
-      <p style="font-family: monospace; margin: 4px 0;">Task due: Send proposal to Mary Lee</p>
-      <p style="font-family: monospace; margin: 4px 0;">Task due: Confirm Wednesday appointment</p>
+    <h2>Today's Reminders</h2>
+    <div class="reminders">
+      <div class="rem-item">
+        <div class="rem-checkbox"></div>
+        <div class="rem-text">Call Sarah Chen about the 296 GTB</div>
+        <div class="rem-time">10:00 AM</div>
+      </div>
+      <div class="rem-item">
+        <div class="rem-checkbox"></div>
+        <div class="rem-text">Follow up with Mike Rivera — SF90 financing</div>
+        <div class="rem-time">2:00 PM</div>
+      </div>
+      <div class="rem-item">
+        <div class="rem-checkbox"></div>
+        <div class="rem-text">Send Jim Bradshaw photos of the 488 Spider</div>
+        <div class="rem-time">4:30 PM</div>
+      </div>
     </div>
-    <p>Recipients can opt out at any time by replying <strong>STOP</strong> to any message, or by removing the underlying task from their task list within the application.</p>
 
-    <h2>SMS opt-in flow</h2>
-    <p>The end user opts in to SMS reminders during initial setup of the Sales Assistant iOS application. The opt-in flow:</p>
-    <ol>
-      <li>End user installs the iOS application from Apple TestFlight (private distribution).</li>
-      <li>End user signs in with their Apple ID and is authenticated against an allowlist.</li>
-      <li>End user enters their personal phone number in app settings; the number is then pre-verified in the Twilio sender account before any messages can be sent.</li>
-      <li>SMS reminders are generated only from tasks the end user has personally created in the app via voice or manual entry.</li>
-      <li>Recipients can opt out by replying STOP, or by removing the task from their task list.</li>
-    </ol>
+    <h2>Find a Customer</h2>
+    <input class="search-box" type="search" placeholder="Type a name…" aria-label="Search customers">
 
-    <div class="contact">
-      <p><strong>Business name:</strong> Rhode Root (sole proprietor)</p>
-      <p><strong>Contact email:</strong> <a href="mailto:rhode.root@gmail.com">rhode.root@gmail.com</a></p>
-      <p><strong>Business address:</strong> Available upon written request via the contact email above.</p>
+    <h2>Recent Interactions</h2>
+    <div class="interactions">
+      <div class="int-item">
+        <div class="int-head">
+          <span class="int-name">Jim Bradshaw</span>
+          <span class="int-time">2h ago</span>
+        </div>
+        <p class="int-snippet">Asked about used 488 Spider this morning, follow up Friday.</p>
+      </div>
+      <div class="int-item">
+        <div class="int-head">
+          <span class="int-name">Antonio Vargas</span>
+          <span class="int-time">Yesterday</span>
+        </div>
+        <p class="int-snippet">SP3 allocation interest confirmed — wants first call when one opens.</p>
+      </div>
+      <div class="int-item">
+        <div class="int-head">
+          <span class="int-name">Dr. Robert Hsu</span>
+          <span class="int-time">2 days ago</span>
+        </div>
+        <p class="int-snippet">Reviewed the 12Cilindri in person, considering trade-in on his 812.</p>
+      </div>
     </div>
 
     <footer>
-      &copy; 2026 Rhode Root. All rights reserved.
+      <span>Bud's Dashboard · Sales Assistant</span>
+      <span><a href="about.html">About / SMS policy</a></span>
     </footer>
+
   </div>
 </body>
 </html>
