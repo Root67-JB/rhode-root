@@ -4,533 +4,840 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Bud's Dashboard — Sales Assistant</title>
-  <meta name="description" content="Daily inventory + customer dashboard for Bud at Palm Beach Ferrari. Companion to the voice-first iOS Sales Assistant app.">
+  <meta name="description" content="Daily inventory + customer dashboard for Bud at Palm Beach Ferrari.">
   <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#0a0a0a">
   <style>
-    :root {
-      --ink: #1a1a1a;
-      --muted: #5a5a5a;
-      --soft: #888;
-      --accent: #c1272d;
-      --accent-soft: #f8e5e6;
-      --bg: #fafafa;
-      --card: #ffffff;
-      --border: #e5e5e5;
-      --gold: #b8860b;
-    }
-    * { box-sizing: border-box; }
+    /* Reset + base */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     html { -webkit-text-size-adjust: 100%; }
     body {
-      margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
       background: var(--bg);
       color: var(--ink);
-      line-height: 1.55;
-      font-size: 17px;
+      line-height: 1.5;
+      font-size: 15px;
+      letter-spacing: -0.005em;
     }
-    .container { max-width: 1080px; margin: 0 auto; padding: 24px 20px 64px; }
+    a { color: inherit; }
 
-    header { display: flex; align-items: center; gap: 20px; margin-bottom: 32px; padding-bottom: 20px; border-bottom: 3px solid var(--accent); }
-    .bebe { width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #f4d76e 0%, #d4a73a 100%); flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 36px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    /* Light palette (default) */
+    :root {
+      --bg: #f5f5f7;
+      --bg-card: #ffffff;
+      --bg-elev: #fafafa;
+      --ink: #1d1d1f;
+      --ink-2: #515154;
+      --ink-3: #8a8a8e;
+      --border: rgba(0, 0, 0, 0.08);
+      --border-strong: rgba(0, 0, 0, 0.14);
+      --accent: #d40000;
+      --accent-soft: #ffe5e5;
+      --gold: #b8860b;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+      --shadow-md: 0 8px 24px rgba(0,0,0,0.08);
+      --shadow-lg: 0 16px 40px rgba(0,0,0,0.14);
+    }
+
+    /* Dark palette */
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0a0a0a;
+        --bg-card: #161618;
+        --bg-elev: #1f1f22;
+        --ink: #f5f5f7;
+        --ink-2: #b4b4b8;
+        --ink-3: #6e6e73;
+        --border: rgba(255, 255, 255, 0.08);
+        --border-strong: rgba(255, 255, 255, 0.14);
+        --accent: #ff3b3b;
+        --accent-soft: rgba(255, 59, 59, 0.12);
+        --gold: #d4af37;
+        --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+        --shadow-md: 0 8px 24px rgba(0,0,0,0.5);
+        --shadow-lg: 0 16px 40px rgba(0,0,0,0.7);
+      }
+    }
+
+    /* Layout */
+    .container { max-width: 1240px; margin: 0 auto; padding: 28px 28px 80px; }
+
+    /* Header */
+    header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+    .bebe {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #f4d76e 0%, #c89b22 100%);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      box-shadow: var(--shadow-sm);
+    }
     .bebe[data-placeholder="true"]::after { content: "🐕"; }
     .greeting { flex: 1; min-width: 0; }
-    .greeting h1 { font-size: 28px; font-weight: 700; margin: 0 0 2px; }
-    .greeting .date { font-size: 16px; color: var(--muted); margin: 0; }
-
-    .snapshot { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 40px; }
-    .stat { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px 12px; text-align: center; }
-    .stat .num { font-size: 44px; font-weight: 700; line-height: 1; margin: 0 0 6px; color: var(--ink); font-variant-numeric: tabular-nums; }
-    .stat .num.accent { color: var(--accent); }
-    .stat .num.gold { color: var(--gold); }
-    .stat .label { font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--soft); margin: 0; }
-
-    .section-h { font-size: 14px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--soft); margin: 32px 0 14px; font-weight: 700; }
-    .section-h.gold { color: var(--gold); }
-
-    /* Model groups -- two-column row layout: model name on the left,
-       cards flow to the right. Each model takes only the vertical space
-       its cars need. */
-    .model-section {
-      display: grid;
-      grid-template-columns: 140px 1fr;
-      gap: 18px;
-      align-items: start;
-      padding: 16px 0;
-      border-bottom: 1px solid var(--border);
-    }
-    .model-section:last-of-type { border-bottom: none; }
-    .model-head { padding-top: 8px; }
-    .model-name {
-      font-size: 18px;
+    .greeting h1 {
+      font-size: 26px;
       font-weight: 700;
-      margin: 0 0 2px;
-      color: var(--ink);
-      line-height: 1.2;
+      letter-spacing: -0.02em;
+      margin-bottom: 2px;
     }
-    .model-count { font-size: 12px; color: var(--soft); letter-spacing: 0.04em; }
+    .greeting .date {
+      font-size: 14px;
+      color: var(--ink-3);
+    }
+    .greeting .date .stale { color: var(--accent); font-weight: 600; }
 
-    .inv-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
-    .inv-card {
-      background: var(--card);
+    /* Snapshot strip -- single horizontal row of inline stats */
+    .snapshot {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0;
+      background: var(--bg-card);
       border: 1px solid var(--border);
-      border-radius: 10px;
+      border-radius: 14px;
+      padding: 14px 4px;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow-sm);
+    }
+    .stat {
+      flex: 1;
+      min-width: 100px;
+      text-align: center;
+      padding: 4px 16px;
+      border-right: 1px solid var(--border);
+    }
+    .stat:last-child { border-right: none; }
+    .stat-num {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+      margin-bottom: 2px;
+      font-variant-numeric: tabular-nums;
+    }
+    .stat-num.gold { color: var(--gold); }
+    .stat-num.accent { color: var(--accent); }
+    .stat-label {
+      font-size: 11px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--ink-3);
+      font-weight: 600;
+    }
+
+    /* Section heading */
+    .section-title {
+      font-size: 13px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--ink-3);
+      font-weight: 700;
+      margin: 28px 0 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .section-title .count {
+      color: var(--ink-3);
+      font-weight: 500;
+      letter-spacing: 0;
+      text-transform: none;
+      font-size: 12px;
+    }
+
+    /* Model index chips */
+    .model-index {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 18px;
+    }
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px 4px 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+    .chip-name { color: var(--ink); }
+    .chip-count {
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-weight: 700;
+      padding: 1px 7px;
+      border-radius: 999px;
+      font-size: 11px;
+      min-width: 18px;
+      text-align: center;
+    }
+
+    /* Card grid -- single dense grid, sorted by model alphabetically */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 14px;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
       overflow: hidden;
-      transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
       position: relative;
     }
-    .inv-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(0,0,0,0.1);
-      border-color: var(--accent);
+    .card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-md);
+      border-color: var(--border-strong);
     }
-    .inv-link {
+    .card-link { display: block; text-decoration: none; color: inherit; cursor: pointer; }
+
+    .card-photo {
+      aspect-ratio: 4 / 3;
+      position: relative;
+      background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+      overflow: hidden;
+    }
+    .card-photo-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
       display: block;
-      text-decoration: none;
-      color: inherit;
-      cursor: pointer;
+      transition: transform 0.5s ease;
     }
-    .inv-photo-wrap { aspect-ratio: 16 / 10; position: relative; background: linear-gradient(135deg, #1a1a1a 0%, #3a3a3a 100%); overflow: hidden; }
-    .inv-photo-img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.3s ease; }
-    .inv-card:hover .inv-photo-img { transform: scale(1.04); }
-    .inv-photo.placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.5); font-size: 13px; }
-    .star { position: absolute; top: 6px; right: 6px; background: rgba(255,255,255,0.95); border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-size: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.2); z-index: 2; }
-    .pending { position: absolute; top: 6px; left: 6px; background: var(--accent); color: #fff; font-size: 10px; font-weight: 700; letter-spacing: 0.05em; padding: 3px 7px; border-radius: 4px; z-index: 2; }
-    /* External-link cue -- shows the card is clickable + opens the live VDP */
-    .vdp-cue {
+    .card-photo-img.placeholder {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: rgba(255,255,255,0.4);
+      font-size: 12px;
+      letter-spacing: 0.05em;
+    }
+    .card:hover .card-photo-img { transform: scale(1.05); }
+
+    /* Model + year overlays on photo */
+    .card-model {
       position: absolute;
-      bottom: 6px;
-      right: 6px;
-      background: rgba(0,0,0,0.65);
+      top: 10px;
+      left: 10px;
+      background: rgba(0,0,0,0.72);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 4px 8px;
+      border-radius: 6px;
+      z-index: 3;
+    }
+    .card-year {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(0,0,0,0.72);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 4px 8px;
+      border-radius: 6px;
+      z-index: 3;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Status badges */
+    .card-badges {
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+      display: flex;
+      gap: 4px;
+      z-index: 3;
+    }
+    .badge {
+      display: inline-block;
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      padding: 3px 6px;
+      border-radius: 4px;
+    }
+    .badge-pending { background: var(--gold); color: #000; }
+    .badge-new { background: #fff; color: #000; }
+    .badge-c { background: var(--accent); color: #fff; }
+
+    /* Hover-only "View listing" cue */
+    .card-cue {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      background: rgba(0,0,0,0.85);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
       color: #fff;
       font-size: 10px;
       font-weight: 600;
       letter-spacing: 0.04em;
-      padding: 3px 6px;
+      padding: 4px 8px;
       border-radius: 4px;
       opacity: 0;
-      transition: opacity 0.15s ease;
-      z-index: 2;
-      backdrop-filter: blur(4px);
+      transition: opacity 0.18s ease;
+      z-index: 3;
     }
-    .inv-card:hover .vdp-cue { opacity: 1; }
-    .inv-body { padding: 10px 12px 12px; }
-    .inv-title { font-size: 14px; font-weight: 600; margin: 0 0 2px; color: var(--ink); line-height: 1.3; }
-    .inv-meta { font-size: 12px; color: var(--muted); margin: 0 0 6px; line-height: 1.3; }
-    .inv-price { font-size: 16px; font-weight: 700; color: var(--ink); margin: 0; font-variant-numeric: tabular-nums; }
-    .inv-tag { display: inline-block; font-size: 10px; color: var(--soft); margin-top: 2px; }
+    .card:hover .card-cue { opacity: 1; }
 
-    /* Lineup */
-    .lineup { list-style: none; padding: 0; margin: 0; columns: 2; column-gap: 24px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px 24px; }
-    .lineup li { padding: 6px 0; font-size: 15px; break-inside: avoid; }
-    .lineup-count { float: right; color: var(--soft); font-size: 13px; }
+    .card-body { padding: 12px 14px 14px; }
+    .card-meta {
+      font-size: 12px;
+      color: var(--ink-3);
+      margin-bottom: 4px;
+      line-height: 1.4;
+    }
+    .card-price {
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: var(--ink);
+      font-variant-numeric: tabular-nums;
+    }
+    .card-tag {
+      font-size: 10px;
+      letter-spacing: 0.04em;
+      color: var(--ink-3);
+      margin-top: 4px;
+    }
+
+    /* Reminders + lineup panels */
+    .panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px 18px;
+      box-shadow: var(--shadow-sm);
+    }
+    .panel-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 10px;
+    }
+    .panel-title {
+      font-size: 13px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--ink-3);
+      font-weight: 700;
+    }
+    .panel-meta { font-size: 12px; color: var(--ink-3); }
+
+    .reminders { list-style: none; }
+    .reminder {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .reminder:last-child { border-bottom: none; }
+    .reminder-check {
+      width: 18px;
+      height: 18px;
+      border: 1.5px solid var(--border-strong);
+      border-radius: 5px;
+      flex-shrink: 0;
+    }
+    .reminder-text { flex: 1; font-size: 14px; color: var(--ink); }
+    .reminder-time {
+      font-size: 12px;
+      color: var(--ink-3);
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    .lineup { list-style: none; columns: 2; column-gap: 24px; }
+    .lineup-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 6px 0;
+      font-size: 14px;
+      break-inside: avoid;
+    }
+    .lineup-name { color: var(--ink); }
+    .lineup-count { color: var(--ink-3); font-variant-numeric: tabular-nums; }
+
+    /* Two-panel side-by-side row */
+    .side-by-side {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 32px;
+    }
 
     /* Footer */
-    footer { margin-top: 64px; padding-top: 24px; border-top: 1px solid var(--border); font-size: 13px; color: var(--soft); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
-    footer a { color: var(--muted); text-decoration: none; }
-    footer a:hover { color: var(--accent); text-decoration: underline; }
+    footer {
+      margin-top: 56px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+      font-size: 12px;
+      color: var(--ink-3);
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    footer a { color: var(--ink-2); text-decoration: none; }
+    footer a:hover { color: var(--accent); }
 
-    .stale { color: var(--accent); font-weight: 600; }
-
-    .preview-banner { background: var(--accent-soft); border: 1px solid var(--accent); border-radius: 8px; padding: 10px 16px; margin-bottom: 24px; font-size: 14px; color: var(--accent); text-align: center; }
-    .preview-banner strong { font-weight: 700; }
-
-    @media (max-width: 640px) {
-      .container { padding: 16px 16px 48px; }
-      .greeting h1 { font-size: 22px; }
-      .greeting .date { font-size: 14px; }
-      .bebe { width: 64px; height: 64px; font-size: 28px; }
-      .snapshot { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-      .stat { padding: 16px 8px; }
-      .stat .num { font-size: 36px; }
-      .model-section { grid-template-columns: 1fr; gap: 8px; padding: 14px 0; }
-      .model-head { padding-top: 0; padding-bottom: 4px; border-bottom: 1px solid var(--border); }
-      .model-name { font-size: 17px; display: inline; margin-right: 8px; }
-      .model-count { display: inline; }
-      .inv-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
-      /* On mobile the VDP cue is permanently visible since there's no hover. */
-      .vdp-cue { opacity: 0.85; }
-      .lineup { columns: 1; }
+    /* Snapshot-time preview banner */
+    .preview-banner {
+      background: var(--accent-soft);
+      color: var(--accent);
+      border-radius: 999px;
+      padding: 6px 14px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+      display: inline-block;
     }
 
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --ink: #f0f0f0;
-        --muted: #b0b0b0;
-        --soft: #888;
-        --bg: #0f0f0f;
-        --card: #1a1a1a;
-        --border: #2a2a2a;
-        --accent-soft: #3a1416;
-      }
+    /* Mobile */
+    @media (max-width: 720px) {
+      .container { padding: 20px 16px 64px; }
+      .greeting h1 { font-size: 22px; }
+      .bebe { width: 48px; height: 48px; font-size: 24px; }
+      .snapshot { padding: 10px 4px; }
+      .stat { padding: 4px 8px; min-width: 80px; }
+      .stat-num { font-size: 22px; }
+      .grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+      .card-cue { opacity: 0.85; }
+      .lineup { columns: 1; }
+      .side-by-side { grid-template-columns: 1fr; }
+    }
+
+    @media (min-width: 1100px) {
+      .grid { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
     }
   </style>
 </head>
 <body>
-  <div class="container">
+  <main class="container">
 
-    <div class="preview-banner">
-      <strong>Static snapshot</strong> — real inventory + photos as of 4:26 PM EDT. Sign-in + live data in the next build.
-    </div>
+    <div class="preview-banner">Static snapshot · 4:34 PM</div>
 
     <header>
       <div class="bebe" data-placeholder="true" aria-label="Bebe the yellow lab"></div>
       <div class="greeting">
         <h1>Good morning, Bud</h1>
-        <p class="date">Friday, June 12, 2026 · Last refreshed 9h ago</p>
+        <p class="date">Friday, June 12 · <span class="">Refreshed 9h ago</span></p>
       </div>
     </header>
 
     <div class="snapshot">
       <div class="stat">
-        <p class="num">20</p>
-        <p class="label">On Lot</p>
+        <div class="stat-num">20</div>
+        <div class="stat-label">On Lot</div>
       </div>
       <div class="stat">
-        <p class="num">$13.4M</p>
-        <p class="label">Lot Value</p>
+        <div class="stat-num">$13.4M</div>
+        <div class="stat-label">Lot Value</div>
       </div>
       <div class="stat">
-        <p class="num gold">0</p>
-        <p class="label">Sale Pending</p>
+        <div class="stat-num gold">0</div>
+        <div class="stat-label">Pending</div>
       </div>
       <div class="stat">
-        <p class="num">20</p>
-        <p class="label">To Order</p>
+        <div class="stat-num">20</div>
+        <div class="stat-label">To Order</div>
       </div>
     </div>
 
-    
+    <h2 class="section-title">On the lot <span class="count">20 cars · 14 models</span></h2>
 
-    <h2 class="section-h">Inventory by Model</h2>
-    
-    <section class="model-section">
-      <div class="model-head">
-        <h3 class="model-name">12Cilindri</h3>
-        <span class="model-count">1 car</span>
-      </div>
-      <div class="inv-grid">
-      <div class="inv-card">
-        <a class="inv-link" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2025-ferrari-12cilindri-base-rwd-2d-coupe-zff10xla6s0321272/" target="_blank" rel="noopener noreferrer" aria-label="Open 2025 12Cilindri listing on ferrariofpalmbeach.com (new tab)" title="Open listing on ferrariofpalmbeach.com">
-        <div class="inv-photo-wrap"><span class="star" title="On lot 2d — new arrival">⭐</span><span class="vdp-cue" aria-hidden="true">VIEW LISTING ↗</span><img class="inv-photo-img" src="https://vehicle-images.carscommerce.inc/5dd6-110007612/ZFF10XLA6S0321272/2112e73bdeab72ee2f920db7202477e3.webp" alt="2025 12Cilindri" loading="lazy"></div>
-        <div class="inv-body">
-          <h3 class="inv-title">2025 12Cilindri</h3>
-          <p class="inv-meta">Giallo Triplo Strato · 1,550 mi · CPO</p>
-          <p class="inv-price">$799,995</p>
-          <p class="inv-tag">2d on lot · — C</p>
-        </div>
-        </a>
-      </div></div>
-    </section>
-    <section class="model-section">
-      <div class="model-head">
-        <h3 class="model-name">296 GTS</h3>
-        <span class="model-count">1 car</span>
-      </div>
-      <div class="inv-grid">
-      <div class="inv-card">
-        <a class="inv-link" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2025-ferrari-296-gts-rwd-2d-convertible-zff01sma8s0320277/" target="_blank" rel="noopener noreferrer" aria-label="Open 2025 296 GTS listing on ferrariofpalmbeach.com (new tab)" title="Open listing on ferrariofpalmbeach.com">
-        <div class="inv-photo-wrap"><span class="star" title="On lot 2d — new arrival">⭐</span><span class="vdp-cue" aria-hidden="true">VIEW LISTING ↗</span><img class="inv-photo-img" src="https://vehicle-images.carscommerce.inc/44e9-110007612/ZFF01SMA8S0320277/934e2c2070d40a8e439b7606bb084b30.webp" alt="2025 296 GTS" loading="lazy"></div>
-        <div class="inv-body">
-          <h3 class="inv-title">2025 296 GTS</h3>
-          <p class="inv-meta">Bianco Avus · 90 mi · CPO</p>
-          <p class="inv-price">$429,995</p>
-          <p class="inv-tag">2d on lot</p>
-        </div>
-        </a>
-      </div></div>
-    </section>
-    <section class="model-section">
-      <div class="model-head">
-        <h3 class="model-name">458 Italia</h3>
-        <span class="model-count">2 cars</span>
-      </div>
-      <div class="inv-grid">
-      <div class="inv-card">
-        <a class="inv-link" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2013-ferrari-458-italia-base-rwd-2d-coupe-zff67nfa4d0190735/" target="_blank" rel="noopener noreferrer" aria-label="Open 2013 458 Italia listing on ferrariofpalmbeach.com (new tab)" title="Open listing on ferrariofpalmbeach.com">
-        <div class="inv-photo-wrap"><span class="star" title="On lot 2d — new arrival">⭐</span><span class="vdp-cue" aria-hidden="true">VIEW LISTING ↗</span><img class="inv-photo-img" src="https://vehicle-images.carscommerce.inc/5770-110007612/ZFF67NFA4D0190735/ab41450005ae521b915e34c7845b5043.webp" alt="2013 458 Italia" loading="lazy"></div>
-        <div class="inv-body">
-          <h3 class="inv-title">2013 458 Italia</h3>
-          <p class="inv-meta">Grigio Silverstone Metallic · 11,052 mi · CPO</p>
-          <p class="inv-price">$399,995</p>
-          <p class="inv-tag">2d on lot</p>
-        </div>
-        </a>
-      </div>
-      <div class="inv-card">
-        <a class="inv-link" href="https://www.ferrariofpalmbeach.com/inventory/used-2011-ferrari-458-italia-base-rwd-2d-coupe-zff67nfa0b0180412/" target="_blank" rel="noopener noreferrer" aria-label="Open 2011 458 Italia listing on ferrariofpalmbeach.com (new tab)" title="Open listing on ferrariofpalmbeach.com">
-        <div class="inv-photo-wrap"><span class="star" title="On lot 2d — new arrival">⭐</span><span class="vdp-cue" aria-hidden="true">VIEW LISTING ↗</span><img class="inv-photo-img" src="https://vehicle-images.carscommerce.inc/a6e9-110007612/ZFF67NFA0B0180412/420eca2eb53d6ab96f20b7e5197c1db0.webp" alt="2011 458 Italia" loading="lazy"></div>
-        <div class="inv-body">
-          <h3 class="inv-title">2011 458 Italia</h3>
-          <p class="inv-meta">Rosso Corsa · 4,768 mi · USED</p>
-          <p class="inv-price">$449,995</p>
-          <p class="inv-tag">2d on lot</p>
-        </div>
-        </a>
-      </div></div>
-    </section>
-    <section class="model-section">
-      <div class="model-head">
-        <h3 class="model-name">488 GTB</h3>
-        <span class="model-count">1 car</span>
-      </div>
-      <div class="inv-grid">
-      <div class="inv-card">
-        <a class="inv-link" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2019-ferrari-488-gtb-base-rwd-2d-coupe-zff79ala7k0239502/" target="_blank" rel="noopener noreferrer" aria-label="Open 2019 488 GTB listing on ferrariofpalmbeach.com (new tab)" title="Open listing on ferrariofpalmbeach.com">
-        <div class="inv-photo-wrap"><span class="star" title="On lot 0d — new arrival">⭐</span><span class="vdp-cue" aria-hidden="true">VIEW LISTING ↗</span><img class="inv-photo-img" src="https://vehicle-images.carscommerce.inc/f0a4-110007612/ZFF79ALA7K0239502/074ea15ed9a5af0283a1c2099a560730.webp" alt="2019 488 GTB" loading="lazy"></div>
-        <div class="inv-body">
-          <h3 class="inv-title">2019 488 GTB</h3>
-          <p class="inv-meta">Rosso Mugello · 4,315 mi · CPO</p>
-          <p class="inv-price">$314,995</p>
-          <p class="inv-tag">new today</p>
-        </div>
-        </a>
-      </div></div>
-    </section>
-    <section class="model-section">
-      <div class="model-head">
-        <h3 class="model-name">488 Pista</h3>
-        <span class="model-count">3 cars</span>
-      </div>
-      <div class="inv-grid">
-      <div class="inv-card">
-        <a class="inv-link" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2020-ferrari-488-pista-base-rwd-2d-convertible-zff91hma2l0253378/" target="_blank" rel="noopener noreferrer" aria-label="Open 2020 488 Pista listing on ferrariofpalmbeach.com (new tab)" title="Open listing on ferrariofpalmbeach.com">
-        <div class="inv-photo-wrap"><span class="star" title="On lot 2d — new arrival">⭐</span><span class="vdp-cue" aria-hidden="true">VIEW LISTING ↗</span><img class="inv-photo-img" src="https://vehicle-images.carscommerce.inc/553c-110007612/ZFF91HMA2L0253378/ae880b7e101f9f27827b50a8677c0ef2.webp" alt="2020 488 Pista" loading="lazy"></div>
-        <div class="inv-body">
-          <h3 class="inv-title">2020 488 Pista</h3>
-          <p class="inv-meta">Rosso Fuoco · 3,440 mi · CPO</p>
-          <p class="inv-price">$1,649,995</p>
-          <p class="inv-tag">2d on lot</p>
-        </div>
-        </a>
-      </div>
-      <div class="inv-card">
-        <a class="inv-link" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2020-ferrari-488-pista-base-rwd-2d-coupe-zff91hla0l0249818/" target="_blank" rel="noopener noreferrer" aria-label="Open 2020 488 Pista listing on ferrariofpalmbeach.com (new tab)" title="Open listing on ferrariofpalmbeach.com">
-        <div class="inv-photo-wrap"><span class="star" title="On lot 0d — new arrival">⭐</span><span class="vdp-cue" aria-hidden="true">VIEW LISTING ↗</span><img class="inv-photo-img" src="https://vehicle-images.carscommerce.inc/ec91-110007612/ZFF91HLA0L0249818/698148573042318d01947bef02901a02.webp" alt="2020 488 Pista" loading="lazy"></div>
-        <div class="inv-body">
-          <h3 class="inv-title">2020 488 Pista</h3>
-          <p class="inv-meta">Nero / Rosso Ferrari · 6,870 mi · CPO</p>
-          <p class="inv-price">$949,195</p>
-          <p class="inv-tag">new today</p>
-        </div>
-        </a>
-      </div>
-      <div class="inv-card">
-        <a class="inv-link" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2020-ferrari-488-pista-base-rwd-2d-coupe-zff91hma0l0249818/" target="_blank" rel="noopener noreferrer" aria-label="Open 2020 488 Pista listing on ferrariofpalmbeach.com (new tab)" title="Open listing on ferrariofpalmbeach.com">
-        <div class="inv-photo-wrap"><span class="star" title="On lot 0d — new arrival">⭐</span><span class="vdp-cue" aria-hidden="true">VIEW LISTING ↗</span><img class="inv-photo-img" src="https://vehicle-images.carscommerce.inc/ec91-110007612/ZFF90HLA0L0249818/698148573042318d01947bef02901a02.webp" alt="2020 488 Pista" loading="lazy"></div>
-        <div class="inv-body">
-          <h3 class="inv-title">2020 488 Pista</h3>
-          <p class="inv-meta">Rosso Fuoco · 6,870 mi · CPO</p>
-          <p class="inv-price">$949,195</p>
-          <p class="inv-tag">new today</p>
-        </div>
-        </a>
-      </div></div>
-    </section>
-    <section class="model-section">
-      <div class="model-head">
-        <h3 class="model-name">488 Spider</h3>
-        <span class="model-count">3 cars</span>
-      </div>
-      <div class="inv-grid">
-      <div class="inv-card">
-        <a class="inv-link" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2019-ferrari-488-spider-base-rwd-2d-convertible-zff80ama5k0241259/" target="_blank" rel="noopener noreferrer" aria-label="Open 2019 488 Spider listing on ferrariofpalmbeach.com (new tab)" title="Open listing on ferrariofpalmbeach.com">
-        <div class="inv-photo-wrap"><span class="star" title="On lot 2d — new arrival">⭐</span><span class="vdp-cue" aria-hidden="true">VIEW LISTING ↗</span><img class="inv-photo-img" src="https://vehicle-images.carscommerce.inc/20af-110007612/ZFF80AMA5K0241259/7a55d1ed166d9f960d26455465c4f16f.webp" alt="2019 488 Spider" loading="lazy"></div>
-        <div class="inv-body">
-          <h3 class="inv-title">2019 488 Spider</h3>
-          <p class="inv-meta">Rosso Corsa · 11,841 mi · CPO</p>
-          <p class="inv-price">$359,895</p>
-          <p class="inv-tag">2d on lot</p>
-        </div>
-        </a>
-      </div>
-      <div class="inv-card">
-        <a class="inv-link" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2019-ferrari-488-spider-base-rwd-2d-convertible-zff80ama9k0246822/" target="_blank" rel="noopener noreferrer" aria-label="Open 2019 488 Spider listing on ferrariofpalmbeach.com (new tab)" title="Open listing on ferrariofpalmbeach.com">
-        <div class="inv-photo-wrap"><span class="star" title="On lot 2d — new arrival">⭐</span><span class="vdp-cue" aria-hidden="true">VIEW LISTING ↗</span><img class="inv-photo-img" src="https://vehicle-images.carscommerce.inc/20af-110007612/ZFF80AMA9K0246822/7a55d1ed166d9f960d26455465c4f16f.webp" alt="2019 488 Spider" loading="lazy"></div>
-        <div class="inv-body">
-          <h3 class="inv-title">2019 488 Spider</h3>
-          <p class="inv-meta">Rosso Corsa · 22,354 mi · CPO</p>
-          <p class="inv-price">$319,995</p>
-          <p class="inv-tag">2d on lot</p>
-        </div>
-        </a>
-      </div>
-      <div class="inv-card">
-        <a class="inv-link" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2018-ferrari-488-spider-base-rwd-2d-convertible-zff80ama7j0233064/" target="_blank" rel="noopener noreferrer" aria-label="Open 2018 488 Spider listing on ferrariofpalmbeach.com (new tab)" title="Open listing on ferrariofpalmbeach.com">
-        <div class="inv-photo-wrap"><span class="star" title="On lot 2d — new arrival">⭐</span><span class="vdp-cue" aria-hidden="true">VIEW LISTING ↗</span><img class="inv-photo-img" src="https://vehicle-images.carscommerce.inc/e4ab-110007612/ZFF80AMA7J0233064/ef7a3cbc3add6e37547b80017ff31ca3.webp" alt="2018 488 Spider" loading="lazy"></div>
-        <div class="inv-body">
-          <h3 class="inv-title">2018 488 Spider</h3>
-          <p class="inv-meta">Bianco Avus · 14,950 mi · CPO</p>
-          <p class="inv-price">$334,995</p>
-          <p class="inv-tag">2d on lot</p>
-        </div>
-        </a>
-      </div></div>
-    </section>
-    <section class="model-section">
-      <div class="model-head">
-        <h3 class="model-name">California T</h3>
-        <span class="model-count">1 car</span>
-      </div>
-      <div class="inv-grid">
-      <div class="inv-card">
-        <a class="inv-link" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2017-ferrari-california-t-rwd-2d-convertible-zff77xja8h0228075/" target="_blank" rel="noopener noreferrer" aria-label="Open 2017 California T listing on ferrariofpalmbeach.com (new tab)" title="Open listing on ferrariofpalmbeach.com">
-        <div class="inv-photo-wrap"><span class="star" title="On lot 2d — new arrival">⭐</span><span class="vdp-cue" aria-hidden="true">VIEW LISTING ↗</span><img class="inv-photo-img" src="https://vehicle-images.carscommerce.inc/f5ce-110007612/ZFF77XJA8H0228075/0334a3936384b4ea5ea363b2f8daac6d.webp" alt="2017 California T" loading="lazy"></div>
-        <div class="inv-body">
-          <h3 class="inv-title">2017 California T</h3>
-          <p class="inv-meta">Azzurro Metallic · 6,808 mi · CPO</p>
-          <p class="inv-price">$264,895</p>
-          <p class="inv-tag">2d on lot</p>
-        </div>
-        </a>
-      </div></div>
-    </section>
-    <section class="model-section">
-      <div class="model-head">
-        <h3 class="model-name">F12 TDF</h3>
-        <span class="model-count">1 car</span>
-      </div>
-      <div class="inv-grid">
-      <div class="inv-card">
-        <a class="inv-link" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2017-ferrari-f12-tdf-base-rwd-2d-coupe-zff81bfa7h0224245/" target="_blank" rel="noopener noreferrer" aria-label="Open 2017 F12 TDF listing on ferrariofpalmbeach.com (new tab)" title="Open listing on ferrariofpalmbeach.com">
-        <div class="inv-photo-wrap"><span class="star" title="On lot 0d — new arrival">⭐</span><span class="vdp-cue" aria-hidden="true">VIEW LISTING ↗</span><img class="inv-photo-img" src="https://vehicle-images.carscommerce.inc/1718-110007612/ZFF81BFA7H0224245/b74b6ce1e773c3ec37ba234f14d6be26.webp" alt="2017 F12 TDF" loading="lazy"></div>
-        <div class="inv-body">
-          <h3 class="inv-title">2017 F12 TDF</h3>
-          <p class="inv-meta">Giallo Triplo Strato · 2,576 mi · CPO</p>
-          <p class="inv-price">$3,499,995</p>
-          <p class="inv-tag">new today · — C</p>
-        </div>
-        </a>
-      </div></div>
-    </section>
-    <section class="model-section">
-      <div class="model-head">
-        <h3 class="model-name">F8 Spider</h3>
-        <span class="model-count">1 car</span>
-      </div>
-      <div class="inv-grid">
-      <div class="inv-card">
-        <a class="inv-link" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2021-ferrari-f8-spider-base-rwd-2d-convertible-zff93lmaxm0264062/" target="_blank" rel="noopener noreferrer" aria-label="Open 2021 F8 Spider listing on ferrariofpalmbeach.com (new tab)" title="Open listing on ferrariofpalmbeach.com">
-        <div class="inv-photo-wrap"><span class="vdp-cue" aria-hidden="true">VIEW LISTING ↗</span><img class="inv-photo-img" src="https://vehicle-images.carscommerce.inc/84e7-110007612/ZFF93LMAXM0264062/247d392136282c526ed39c37e865422f.webp" alt="2021 F8 Spider" loading="lazy"></div>
-        <div class="inv-body">
-          <h3 class="inv-title">2021 F8 Spider</h3>
-          <p class="inv-meta">Grigio Titanio Metallic · 4,910 mi · CPO</p>
-          <p class="inv-price">$484,895</p>
-          <p class="inv-tag">36d on lot</p>
-        </div>
-        </a>
-      </div></div>
-    </section>
-    <section class="model-section">
-      <div class="model-head">
-        <h3 class="model-name">F8 Tributo</h3>
-        <span class="model-count">1 car</span>
-      </div>
-      <div class="inv-grid">
-      <div class="inv-card">
-        <a class="inv-link" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2020-ferrari-f8-tributo-base-rwd-2d-coupe-zff92lla5l0253473/" target="_blank" rel="noopener noreferrer" aria-label="Open 2020 F8 Tributo listing on ferrariofpalmbeach.com (new tab)" title="Open listing on ferrariofpalmbeach.com">
-        <div class="inv-photo-wrap"><span class="star" title="On lot 2d — new arrival">⭐</span><span class="vdp-cue" aria-hidden="true">VIEW LISTING ↗</span><img class="inv-photo-img" src="https://vehicle-images.carscommerce.inc/1418-110007612/ZFF92LLA5L0253473/a8828a383a98ec9298c11163d4e1b960.webp" alt="2020 F8 Tributo" loading="lazy"></div>
-        <div class="inv-body">
-          <h3 class="inv-title">2020 F8 Tributo</h3>
-          <p class="inv-meta">Rosso Scuderia · 9,111 mi · CPO</p>
-          <p class="inv-price">$398,995</p>
-          <p class="inv-tag">2d on lot · — C</p>
-        </div>
-        </a>
-      </div></div>
-    </section>
-    <section class="model-section">
-      <div class="model-head">
-        <h3 class="model-name">Portofino</h3>
-        <span class="model-count">1 car</span>
-      </div>
-      <div class="inv-grid">
-      <div class="inv-card">
-        <a class="inv-link" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2019-ferrari-portofino-base-rwd-2d-convertible-zff89fpa1k0240947/" target="_blank" rel="noopener noreferrer" aria-label="Open 2019 Portofino listing on ferrariofpalmbeach.com (new tab)" title="Open listing on ferrariofpalmbeach.com">
-        <div class="inv-photo-wrap"><span class="star" title="On lot 2d — new arrival">⭐</span><span class="vdp-cue" aria-hidden="true">VIEW LISTING ↗</span><img class="inv-photo-img" src="https://vehicle-images.carscommerce.inc/a67a-110007612/ZFF89FPA1K0240947/6d87e0d4ccbbdb8b3c5aadf2380ecaab.webp" alt="2019 Portofino" loading="lazy"></div>
-        <div class="inv-body">
-          <h3 class="inv-title">2019 Portofino</h3>
-          <p class="inv-meta">7,167 mi · CPO</p>
-          <p class="inv-price">$204,895</p>
-          <p class="inv-tag">2d on lot</p>
-        </div>
-        </a>
-      </div></div>
-    </section>
-    <section class="model-section">
-      <div class="model-head">
-        <h3 class="model-name">Portofino M</h3>
-        <span class="model-count">2 cars</span>
-      </div>
-      <div class="inv-grid">
-      <div class="inv-card">
-        <a class="inv-link" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2023-ferrari-portofino-m-base-rwd-2d-convertible-zff02rpa4p0289019/" target="_blank" rel="noopener noreferrer" aria-label="Open 2023 Portofino M listing on ferrariofpalmbeach.com (new tab)" title="Open listing on ferrariofpalmbeach.com">
-        <div class="inv-photo-wrap"><span class="star" title="On lot 2d — new arrival">⭐</span><span class="vdp-cue" aria-hidden="true">VIEW LISTING ↗</span><img class="inv-photo-img" src="https://vehicle-images.carscommerce.inc/401c-110007612/ZFF02RPA4P0289019/543112bec11529a57f2f71fcc136860e.webp" alt="2023 Portofino M" loading="lazy"></div>
-        <div class="inv-body">
-          <h3 class="inv-title">2023 Portofino M</h3>
-          <p class="inv-meta">Blu America · 405 mi · CPO</p>
-          <p class="inv-price">$299,895</p>
-          <p class="inv-tag">2d on lot</p>
-        </div>
-        </a>
-      </div>
-      <div class="inv-card">
-        <a class="inv-link" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2022-ferrari-portofino-m-base-rwd-2d-convertible-zff02rpa0n0272540/" target="_blank" rel="noopener noreferrer" aria-label="Open 2022 Portofino M listing on ferrariofpalmbeach.com (new tab)" title="Open listing on ferrariofpalmbeach.com">
-        <div class="inv-photo-wrap"><span class="star" title="On lot 2d — new arrival">⭐</span><span class="vdp-cue" aria-hidden="true">VIEW LISTING ↗</span><img class="inv-photo-img" src="https://vehicle-images.carscommerce.inc/39df-110007612/ZFF02RPA0N0272540/48061079ddfe0d37ef46f5c78ea63dba.webp" alt="2022 Portofino M" loading="lazy"></div>
-        <div class="inv-body">
-          <h3 class="inv-title">2022 Portofino M</h3>
-          <p class="inv-meta">Bianco Avus · 3,410 mi · CPO</p>
-          <p class="inv-price">$279,895</p>
-          <p class="inv-tag">2d on lot</p>
-        </div>
-        </a>
-      </div></div>
-    </section>
-    <section class="model-section">
-      <div class="model-head">
-        <h3 class="model-name">Roma</h3>
-        <span class="model-count">1 car</span>
-      </div>
-      <div class="inv-grid">
-      <div class="inv-card">
-        <a class="inv-link" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2025-ferrari-roma-base-rwd-2d-convertible-zff09rpa9s0317692/" target="_blank" rel="noopener noreferrer" aria-label="Open 2025 Roma listing on ferrariofpalmbeach.com (new tab)" title="Open listing on ferrariofpalmbeach.com">
-        <div class="inv-photo-wrap"><span class="star" title="On lot 0d — new arrival">⭐</span><span class="vdp-cue" aria-hidden="true">VIEW LISTING ↗</span><img class="inv-photo-img" src="https://vehicle-images.carscommerce.inc/8457-110007612/ZFF09RPA9S0317692/f20c22237211e70f5661319521024b9d.webp" alt="2025 Roma" loading="lazy"></div>
-        <div class="inv-body">
-          <h3 class="inv-title">2025 Roma</h3>
-          <p class="inv-meta">Giallo Modena · 84 mi · CPO</p>
-          <p class="inv-price">$309,895</p>
-          <p class="inv-tag">new today</p>
-        </div>
-        </a>
-      </div></div>
-    </section>
-    <section class="model-section">
-      <div class="model-head">
-        <h3 class="model-name">SF90 Spider</h3>
-        <span class="model-count">1 car</span>
-      </div>
-      <div class="inv-grid">
-      <div class="inv-card">
-        <a class="inv-link" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2024-ferrari-sf90-spider-base-awd-2d-convertible-zff96nma1r0309707/" target="_blank" rel="noopener noreferrer" aria-label="Open 2024 SF90 Spider listing on ferrariofpalmbeach.com (new tab)" title="Open listing on ferrariofpalmbeach.com">
-        <div class="inv-photo-wrap"><span class="vdp-cue" aria-hidden="true">VIEW LISTING ↗</span><img class="inv-photo-img" src="https://vehicle-images.carscommerce.inc/6ae4-110007612/ZFF96NMA1R0309707/14e13760ce79427a0d532d04188daf5f.webp" alt="2024 SF90 Spider" loading="lazy"></div>
-        <div class="inv-body">
-          <h3 class="inv-title">2024 SF90 Spider</h3>
-          <p class="inv-meta">Giallo Modena · 76 mi · CPO</p>
-          <p class="inv-price">$649,895</p>
-          <p class="inv-tag">36d on lot · — C</p>
-        </div>
-        </a>
-      </div></div>
-    </section>
+    <div class="model-index" aria-label="Models on lot"><span class="chip"><span class="chip-name">12Cilindri</span><span class="chip-count">1</span></span><span class="chip"><span class="chip-name">296 GTS</span><span class="chip-count">1</span></span><span class="chip"><span class="chip-name">458 Italia</span><span class="chip-count">2</span></span><span class="chip"><span class="chip-name">488 GTB</span><span class="chip-count">1</span></span><span class="chip"><span class="chip-name">488 Pista</span><span class="chip-count">3</span></span><span class="chip"><span class="chip-name">488 Spider</span><span class="chip-count">3</span></span><span class="chip"><span class="chip-name">California T</span><span class="chip-count">1</span></span><span class="chip"><span class="chip-name">F12 TDF</span><span class="chip-count">1</span></span><span class="chip"><span class="chip-name">F8 Spider</span><span class="chip-count">1</span></span><span class="chip"><span class="chip-name">F8 Tributo</span><span class="chip-count">1</span></span><span class="chip"><span class="chip-name">Portofino</span><span class="chip-count">1</span></span><span class="chip"><span class="chip-name">Portofino M</span><span class="chip-count">2</span></span><span class="chip"><span class="chip-name">Roma</span><span class="chip-count">1</span></span><span class="chip"><span class="chip-name">SF90 Spider</span><span class="chip-count">1</span></span></div>
 
-    
-    <h2 class="section-h">To Order</h2>
-    <ul class="lineup"><li><strong>Ferrari 12Cilindri</strong> <span class="lineup-count">1</span></li><li><strong>Ferrari 12Cilindri Spider</strong> <span class="lineup-count">1</span></li><li><strong>Ferrari 296 GTB</strong> <span class="lineup-count">1</span></li><li><strong>Ferrari 296 GTS</strong> <span class="lineup-count">1</span></li><li><strong>Ferrari 296 Speciale</strong> <span class="lineup-count">1</span></li><li><strong>Ferrari 296 Speciale A</strong> <span class="lineup-count">1</span></li><li><strong>Ferrari 812 Competizione</strong> <span class="lineup-count">1</span></li><li><strong>Ferrari 812 Competizione A</strong> <span class="lineup-count">1</span></li><li><strong>Ferrari 849 Testarossa</strong> <span class="lineup-count">1</span></li><li><strong>Ferrari 849 Testarossa Spider</strong> <span class="lineup-count">1</span></li><li><strong>Ferrari Amalfi</strong> <span class="lineup-count">1</span></li><li><strong>Ferrari Amalfi Spider</strong> <span class="lineup-count">1</span></li><li><strong>Ferrari Daytona SP3</strong> <span class="lineup-count">1</span></li><li><strong>Ferrari F80</strong> <span class="lineup-count">1</span></li><li><strong>Ferrari Luce</strong> <span class="lineup-count">1</span></li><li><strong>Ferrari Monza SP1</strong> <span class="lineup-count">1</span></li><li><strong>Ferrari Monza SP2</strong> <span class="lineup-count">1</span></li><li><strong>Ferrari Purosangue</strong> <span class="lineup-count">1</span></li><li><strong>Ferrari SF90 XX Spider</strong> <span class="lineup-count">1</span></li><li><strong>Ferrari SF90 XX Stradale</strong> <span class="lineup-count">1</span></li></ul>
+    <div class="grid">
+      
+    <article class="card">
+      <a class="card-link" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2025-ferrari-12cilindri-base-rwd-2d-coupe-zff10xla6s0321272/" target="_blank" rel="noopener noreferrer" aria-label="Open 2025 12Cilindri listing on ferrariofpalmbeach.com (new tab)" title="Open listing on ferrariofpalmbeach.com">
+        <div class="card-photo">
+          <span class="card-model">12Cilindri</span>
+          <span class="card-year">2025</span>
+          <div class="card-badges"><span class="badge badge-new" title="On lot 2d">NEW</span><span class="badge badge-c" title="Stock matches last 8 of VIN">C</span></div>
+          <img class="card-photo-img" src="https://vehicle-images.carscommerce.inc/5dd6-110007612/ZFF10XLA6S0321272/2112e73bdeab72ee2f920db7202477e3.webp" alt="2025 12Cilindri" loading="lazy">
+          <span class="card-cue">View listing ↗</span>
+        </div>
+        <div class="card-body">
+          <p class="card-meta">Giallo Triplo Strato · 1,550 mi</p>
+          <p class="card-price">$799,995</p>
+          <p class="card-tag">2d on lot · CPO</p>
+        </div>
+      </a>
+    </article>
+    <article class="card">
+      <a class="card-link" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2025-ferrari-296-gts-rwd-2d-convertible-zff01sma8s0320277/" target="_blank" rel="noopener noreferrer" aria-label="Open 2025 296 GTS listing on ferrariofpalmbeach.com (new tab)" title="Open listing on ferrariofpalmbeach.com">
+        <div class="card-photo">
+          <span class="card-model">296 GTS</span>
+          <span class="card-year">2025</span>
+          <div class="card-badges"><span class="badge badge-new" title="On lot 2d">NEW</span></div>
+          <img class="card-photo-img" src="https://vehicle-images.carscommerce.inc/44e9-110007612/ZFF01SMA8S0320277/934e2c2070d40a8e439b7606bb084b30.webp" alt="2025 296 GTS" loading="lazy">
+          <span class="card-cue">View listing ↗</span>
+        </div>
+        <div class="card-body">
+          <p class="card-meta">Bianco Avus · 90 mi</p>
+          <p class="card-price">$429,995</p>
+          <p class="card-tag">2d on lot · CPO</p>
+        </div>
+      </a>
+    </article>
+    <article class="card">
+      <a class="card-link" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2013-ferrari-458-italia-base-rwd-2d-coupe-zff67nfa4d0190735/" target="_blank" rel="noopener noreferrer" aria-label="Open 2013 458 Italia listing on ferrariofpalmbeach.com (new tab)" title="Open listing on ferrariofpalmbeach.com">
+        <div class="card-photo">
+          <span class="card-model">458 Italia</span>
+          <span class="card-year">2013</span>
+          <div class="card-badges"><span class="badge badge-new" title="On lot 2d">NEW</span></div>
+          <img class="card-photo-img" src="https://vehicle-images.carscommerce.inc/5770-110007612/ZFF67NFA4D0190735/ab41450005ae521b915e34c7845b5043.webp" alt="2013 458 Italia" loading="lazy">
+          <span class="card-cue">View listing ↗</span>
+        </div>
+        <div class="card-body">
+          <p class="card-meta">Grigio Silverstone Metallic · 11,052 mi</p>
+          <p class="card-price">$399,995</p>
+          <p class="card-tag">2d on lot · CPO</p>
+        </div>
+      </a>
+    </article>
+    <article class="card">
+      <a class="card-link" href="https://www.ferrariofpalmbeach.com/inventory/used-2011-ferrari-458-italia-base-rwd-2d-coupe-zff67nfa0b0180412/" target="_blank" rel="noopener noreferrer" aria-label="Open 2011 458 Italia listing on ferrariofpalmbeach.com (new tab)" title="Open listing on ferrariofpalmbeach.com">
+        <div class="card-photo">
+          <span class="card-model">458 Italia</span>
+          <span class="card-year">2011</span>
+          <div class="card-badges"><span class="badge badge-new" title="On lot 2d">NEW</span></div>
+          <img class="card-photo-img" src="https://vehicle-images.carscommerce.inc/a6e9-110007612/ZFF67NFA0B0180412/420eca2eb53d6ab96f20b7e5197c1db0.webp" alt="2011 458 Italia" loading="lazy">
+          <span class="card-cue">View listing ↗</span>
+        </div>
+        <div class="card-body">
+          <p class="card-meta">Rosso Corsa · 4,768 mi</p>
+          <p class="card-price">$449,995</p>
+          <p class="card-tag">2d on lot · USED</p>
+        </div>
+      </a>
+    </article>
+    <article class="card">
+      <a class="card-link" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2019-ferrari-488-gtb-base-rwd-2d-coupe-zff79ala7k0239502/" target="_blank" rel="noopener noreferrer" aria-label="Open 2019 488 GTB listing on ferrariofpalmbeach.com (new tab)" title="Open listing on ferrariofpalmbeach.com">
+        <div class="card-photo">
+          <span class="card-model">488 GTB</span>
+          <span class="card-year">2019</span>
+          <div class="card-badges"><span class="badge badge-new" title="On lot 0d">NEW</span></div>
+          <img class="card-photo-img" src="https://vehicle-images.carscommerce.inc/f0a4-110007612/ZFF79ALA7K0239502/074ea15ed9a5af0283a1c2099a560730.webp" alt="2019 488 GTB" loading="lazy">
+          <span class="card-cue">View listing ↗</span>
+        </div>
+        <div class="card-body">
+          <p class="card-meta">Rosso Mugello · 4,315 mi</p>
+          <p class="card-price">$314,995</p>
+          <p class="card-tag">new today · CPO</p>
+        </div>
+      </a>
+    </article>
+    <article class="card">
+      <a class="card-link" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2020-ferrari-488-pista-base-rwd-2d-convertible-zff91hma2l0253378/" target="_blank" rel="noopener noreferrer" aria-label="Open 2020 488 Pista listing on ferrariofpalmbeach.com (new tab)" title="Open listing on ferrariofpalmbeach.com">
+        <div class="card-photo">
+          <span class="card-model">488 Pista</span>
+          <span class="card-year">2020</span>
+          <div class="card-badges"><span class="badge badge-new" title="On lot 2d">NEW</span></div>
+          <img class="card-photo-img" src="https://vehicle-images.carscommerce.inc/553c-110007612/ZFF91HMA2L0253378/ae880b7e101f9f27827b50a8677c0ef2.webp" alt="2020 488 Pista" loading="lazy">
+          <span class="card-cue">View listing ↗</span>
+        </div>
+        <div class="card-body">
+          <p class="card-meta">Rosso Fuoco · 3,440 mi</p>
+          <p class="card-price">$1,649,995</p>
+          <p class="card-tag">2d on lot · CPO</p>
+        </div>
+      </a>
+    </article>
+    <article class="card">
+      <a class="card-link" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2020-ferrari-488-pista-base-rwd-2d-coupe-zff91hla0l0249818/" target="_blank" rel="noopener noreferrer" aria-label="Open 2020 488 Pista listing on ferrariofpalmbeach.com (new tab)" title="Open listing on ferrariofpalmbeach.com">
+        <div class="card-photo">
+          <span class="card-model">488 Pista</span>
+          <span class="card-year">2020</span>
+          <div class="card-badges"><span class="badge badge-new" title="On lot 0d">NEW</span></div>
+          <img class="card-photo-img" src="https://vehicle-images.carscommerce.inc/ec91-110007612/ZFF91HLA0L0249818/698148573042318d01947bef02901a02.webp" alt="2020 488 Pista" loading="lazy">
+          <span class="card-cue">View listing ↗</span>
+        </div>
+        <div class="card-body">
+          <p class="card-meta">Nero / Rosso Ferrari · 6,870 mi</p>
+          <p class="card-price">$949,195</p>
+          <p class="card-tag">new today · CPO</p>
+        </div>
+      </a>
+    </article>
+    <article class="card">
+      <a class="card-link" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2020-ferrari-488-pista-base-rwd-2d-coupe-zff91hma0l0249818/" target="_blank" rel="noopener noreferrer" aria-label="Open 2020 488 Pista listing on ferrariofpalmbeach.com (new tab)" title="Open listing on ferrariofpalmbeach.com">
+        <div class="card-photo">
+          <span class="card-model">488 Pista</span>
+          <span class="card-year">2020</span>
+          <div class="card-badges"><span class="badge badge-new" title="On lot 0d">NEW</span></div>
+          <img class="card-photo-img" src="https://vehicle-images.carscommerce.inc/ec91-110007612/ZFF90HLA0L0249818/698148573042318d01947bef02901a02.webp" alt="2020 488 Pista" loading="lazy">
+          <span class="card-cue">View listing ↗</span>
+        </div>
+        <div class="card-body">
+          <p class="card-meta">Rosso Fuoco · 6,870 mi</p>
+          <p class="card-price">$949,195</p>
+          <p class="card-tag">new today · CPO</p>
+        </div>
+      </a>
+    </article>
+    <article class="card">
+      <a class="card-link" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2019-ferrari-488-spider-base-rwd-2d-convertible-zff80ama5k0241259/" target="_blank" rel="noopener noreferrer" aria-label="Open 2019 488 Spider listing on ferrariofpalmbeach.com (new tab)" title="Open listing on ferrariofpalmbeach.com">
+        <div class="card-photo">
+          <span class="card-model">488 Spider</span>
+          <span class="card-year">2019</span>
+          <div class="card-badges"><span class="badge badge-new" title="On lot 2d">NEW</span></div>
+          <img class="card-photo-img" src="https://vehicle-images.carscommerce.inc/20af-110007612/ZFF80AMA5K0241259/7a55d1ed166d9f960d26455465c4f16f.webp" alt="2019 488 Spider" loading="lazy">
+          <span class="card-cue">View listing ↗</span>
+        </div>
+        <div class="card-body">
+          <p class="card-meta">Rosso Corsa · 11,841 mi</p>
+          <p class="card-price">$359,895</p>
+          <p class="card-tag">2d on lot · CPO</p>
+        </div>
+      </a>
+    </article>
+    <article class="card">
+      <a class="card-link" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2019-ferrari-488-spider-base-rwd-2d-convertible-zff80ama9k0246822/" target="_blank" rel="noopener noreferrer" aria-label="Open 2019 488 Spider listing on ferrariofpalmbeach.com (new tab)" title="Open listing on ferrariofpalmbeach.com">
+        <div class="card-photo">
+          <span class="card-model">488 Spider</span>
+          <span class="card-year">2019</span>
+          <div class="card-badges"><span class="badge badge-new" title="On lot 2d">NEW</span></div>
+          <img class="card-photo-img" src="https://vehicle-images.carscommerce.inc/20af-110007612/ZFF80AMA9K0246822/7a55d1ed166d9f960d26455465c4f16f.webp" alt="2019 488 Spider" loading="lazy">
+          <span class="card-cue">View listing ↗</span>
+        </div>
+        <div class="card-body">
+          <p class="card-meta">Rosso Corsa · 22,354 mi</p>
+          <p class="card-price">$319,995</p>
+          <p class="card-tag">2d on lot · CPO</p>
+        </div>
+      </a>
+    </article>
+    <article class="card">
+      <a class="card-link" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2018-ferrari-488-spider-base-rwd-2d-convertible-zff80ama7j0233064/" target="_blank" rel="noopener noreferrer" aria-label="Open 2018 488 Spider listing on ferrariofpalmbeach.com (new tab)" title="Open listing on ferrariofpalmbeach.com">
+        <div class="card-photo">
+          <span class="card-model">488 Spider</span>
+          <span class="card-year">2018</span>
+          <div class="card-badges"><span class="badge badge-new" title="On lot 2d">NEW</span></div>
+          <img class="card-photo-img" src="https://vehicle-images.carscommerce.inc/e4ab-110007612/ZFF80AMA7J0233064/ef7a3cbc3add6e37547b80017ff31ca3.webp" alt="2018 488 Spider" loading="lazy">
+          <span class="card-cue">View listing ↗</span>
+        </div>
+        <div class="card-body">
+          <p class="card-meta">Bianco Avus · 14,950 mi</p>
+          <p class="card-price">$334,995</p>
+          <p class="card-tag">2d on lot · CPO</p>
+        </div>
+      </a>
+    </article>
+    <article class="card">
+      <a class="card-link" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2017-ferrari-california-t-rwd-2d-convertible-zff77xja8h0228075/" target="_blank" rel="noopener noreferrer" aria-label="Open 2017 California T listing on ferrariofpalmbeach.com (new tab)" title="Open listing on ferrariofpalmbeach.com">
+        <div class="card-photo">
+          <span class="card-model">California T</span>
+          <span class="card-year">2017</span>
+          <div class="card-badges"><span class="badge badge-new" title="On lot 2d">NEW</span></div>
+          <img class="card-photo-img" src="https://vehicle-images.carscommerce.inc/f5ce-110007612/ZFF77XJA8H0228075/0334a3936384b4ea5ea363b2f8daac6d.webp" alt="2017 California T" loading="lazy">
+          <span class="card-cue">View listing ↗</span>
+        </div>
+        <div class="card-body">
+          <p class="card-meta">Azzurro Metallic · 6,808 mi</p>
+          <p class="card-price">$264,895</p>
+          <p class="card-tag">2d on lot · CPO</p>
+        </div>
+      </a>
+    </article>
+    <article class="card">
+      <a class="card-link" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2017-ferrari-f12-tdf-base-rwd-2d-coupe-zff81bfa7h0224245/" target="_blank" rel="noopener noreferrer" aria-label="Open 2017 F12 TDF listing on ferrariofpalmbeach.com (new tab)" title="Open listing on ferrariofpalmbeach.com">
+        <div class="card-photo">
+          <span class="card-model">F12 TDF</span>
+          <span class="card-year">2017</span>
+          <div class="card-badges"><span class="badge badge-new" title="On lot 0d">NEW</span><span class="badge badge-c" title="Stock matches last 8 of VIN">C</span></div>
+          <img class="card-photo-img" src="https://vehicle-images.carscommerce.inc/1718-110007612/ZFF81BFA7H0224245/b74b6ce1e773c3ec37ba234f14d6be26.webp" alt="2017 F12 TDF" loading="lazy">
+          <span class="card-cue">View listing ↗</span>
+        </div>
+        <div class="card-body">
+          <p class="card-meta">Giallo Triplo Strato · 2,576 mi</p>
+          <p class="card-price">$3,499,995</p>
+          <p class="card-tag">new today · CPO</p>
+        </div>
+      </a>
+    </article>
+    <article class="card">
+      <a class="card-link" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2021-ferrari-f8-spider-base-rwd-2d-convertible-zff93lmaxm0264062/" target="_blank" rel="noopener noreferrer" aria-label="Open 2021 F8 Spider listing on ferrariofpalmbeach.com (new tab)" title="Open listing on ferrariofpalmbeach.com">
+        <div class="card-photo">
+          <span class="card-model">F8 Spider</span>
+          <span class="card-year">2021</span>
+          
+          <img class="card-photo-img" src="https://vehicle-images.carscommerce.inc/84e7-110007612/ZFF93LMAXM0264062/247d392136282c526ed39c37e865422f.webp" alt="2021 F8 Spider" loading="lazy">
+          <span class="card-cue">View listing ↗</span>
+        </div>
+        <div class="card-body">
+          <p class="card-meta">Grigio Titanio Metallic · 4,910 mi</p>
+          <p class="card-price">$484,895</p>
+          <p class="card-tag">36d on lot · CPO</p>
+        </div>
+      </a>
+    </article>
+    <article class="card">
+      <a class="card-link" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2020-ferrari-f8-tributo-base-rwd-2d-coupe-zff92lla5l0253473/" target="_blank" rel="noopener noreferrer" aria-label="Open 2020 F8 Tributo listing on ferrariofpalmbeach.com (new tab)" title="Open listing on ferrariofpalmbeach.com">
+        <div class="card-photo">
+          <span class="card-model">F8 Tributo</span>
+          <span class="card-year">2020</span>
+          <div class="card-badges"><span class="badge badge-new" title="On lot 2d">NEW</span><span class="badge badge-c" title="Stock matches last 8 of VIN">C</span></div>
+          <img class="card-photo-img" src="https://vehicle-images.carscommerce.inc/1418-110007612/ZFF92LLA5L0253473/a8828a383a98ec9298c11163d4e1b960.webp" alt="2020 F8 Tributo" loading="lazy">
+          <span class="card-cue">View listing ↗</span>
+        </div>
+        <div class="card-body">
+          <p class="card-meta">Rosso Scuderia · 9,111 mi</p>
+          <p class="card-price">$398,995</p>
+          <p class="card-tag">2d on lot · CPO</p>
+        </div>
+      </a>
+    </article>
+    <article class="card">
+      <a class="card-link" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2019-ferrari-portofino-base-rwd-2d-convertible-zff89fpa1k0240947/" target="_blank" rel="noopener noreferrer" aria-label="Open 2019 Portofino listing on ferrariofpalmbeach.com (new tab)" title="Open listing on ferrariofpalmbeach.com">
+        <div class="card-photo">
+          <span class="card-model">Portofino</span>
+          <span class="card-year">2019</span>
+          <div class="card-badges"><span class="badge badge-new" title="On lot 2d">NEW</span></div>
+          <img class="card-photo-img" src="https://vehicle-images.carscommerce.inc/a67a-110007612/ZFF89FPA1K0240947/6d87e0d4ccbbdb8b3c5aadf2380ecaab.webp" alt="2019 Portofino" loading="lazy">
+          <span class="card-cue">View listing ↗</span>
+        </div>
+        <div class="card-body">
+          <p class="card-meta">7,167 mi</p>
+          <p class="card-price">$204,895</p>
+          <p class="card-tag">2d on lot · CPO</p>
+        </div>
+      </a>
+    </article>
+    <article class="card">
+      <a class="card-link" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2023-ferrari-portofino-m-base-rwd-2d-convertible-zff02rpa4p0289019/" target="_blank" rel="noopener noreferrer" aria-label="Open 2023 Portofino M listing on ferrariofpalmbeach.com (new tab)" title="Open listing on ferrariofpalmbeach.com">
+        <div class="card-photo">
+          <span class="card-model">Portofino M</span>
+          <span class="card-year">2023</span>
+          <div class="card-badges"><span class="badge badge-new" title="On lot 2d">NEW</span></div>
+          <img class="card-photo-img" src="https://vehicle-images.carscommerce.inc/401c-110007612/ZFF02RPA4P0289019/543112bec11529a57f2f71fcc136860e.webp" alt="2023 Portofino M" loading="lazy">
+          <span class="card-cue">View listing ↗</span>
+        </div>
+        <div class="card-body">
+          <p class="card-meta">Blu America · 405 mi</p>
+          <p class="card-price">$299,895</p>
+          <p class="card-tag">2d on lot · CPO</p>
+        </div>
+      </a>
+    </article>
+    <article class="card">
+      <a class="card-link" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2022-ferrari-portofino-m-base-rwd-2d-convertible-zff02rpa0n0272540/" target="_blank" rel="noopener noreferrer" aria-label="Open 2022 Portofino M listing on ferrariofpalmbeach.com (new tab)" title="Open listing on ferrariofpalmbeach.com">
+        <div class="card-photo">
+          <span class="card-model">Portofino M</span>
+          <span class="card-year">2022</span>
+          <div class="card-badges"><span class="badge badge-new" title="On lot 2d">NEW</span></div>
+          <img class="card-photo-img" src="https://vehicle-images.carscommerce.inc/39df-110007612/ZFF02RPA0N0272540/48061079ddfe0d37ef46f5c78ea63dba.webp" alt="2022 Portofino M" loading="lazy">
+          <span class="card-cue">View listing ↗</span>
+        </div>
+        <div class="card-body">
+          <p class="card-meta">Bianco Avus · 3,410 mi</p>
+          <p class="card-price">$279,895</p>
+          <p class="card-tag">2d on lot · CPO</p>
+        </div>
+      </a>
+    </article>
+    <article class="card">
+      <a class="card-link" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2025-ferrari-roma-base-rwd-2d-convertible-zff09rpa9s0317692/" target="_blank" rel="noopener noreferrer" aria-label="Open 2025 Roma listing on ferrariofpalmbeach.com (new tab)" title="Open listing on ferrariofpalmbeach.com">
+        <div class="card-photo">
+          <span class="card-model">Roma</span>
+          <span class="card-year">2025</span>
+          <div class="card-badges"><span class="badge badge-new" title="On lot 0d">NEW</span></div>
+          <img class="card-photo-img" src="https://vehicle-images.carscommerce.inc/8457-110007612/ZFF09RPA9S0317692/f20c22237211e70f5661319521024b9d.webp" alt="2025 Roma" loading="lazy">
+          <span class="card-cue">View listing ↗</span>
+        </div>
+        <div class="card-body">
+          <p class="card-meta">Giallo Modena · 84 mi</p>
+          <p class="card-price">$309,895</p>
+          <p class="card-tag">new today · CPO</p>
+        </div>
+      </a>
+    </article>
+    <article class="card">
+      <a class="card-link" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2024-ferrari-sf90-spider-base-awd-2d-convertible-zff96nma1r0309707/" target="_blank" rel="noopener noreferrer" aria-label="Open 2024 SF90 Spider listing on ferrariofpalmbeach.com (new tab)" title="Open listing on ferrariofpalmbeach.com">
+        <div class="card-photo">
+          <span class="card-model">SF90 Spider</span>
+          <span class="card-year">2024</span>
+          <div class="card-badges"><span class="badge badge-c" title="Stock matches last 8 of VIN">C</span></div>
+          <img class="card-photo-img" src="https://vehicle-images.carscommerce.inc/6ae4-110007612/ZFF96NMA1R0309707/14e13760ce79427a0d532d04188daf5f.webp" alt="2024 SF90 Spider" loading="lazy">
+          <span class="card-cue">View listing ↗</span>
+        </div>
+        <div class="card-body">
+          <p class="card-meta">Giallo Modena · 76 mi</p>
+          <p class="card-price">$649,895</p>
+          <p class="card-tag">36d on lot · CPO</p>
+        </div>
+      </a>
+    </article>
+    </div>
+
+    <div class="side-by-side">
+      
+    <section class="panel reminders-panel">
+      <header class="panel-head">
+        <h2 class="panel-title">Today's reminders</h2>
+        <span class="panel-meta">3 due</span>
+      </header>
+      <ul class="reminders">
+      <li class="reminder">
+        <span class="reminder-check" aria-hidden="true"></span>
+        <span class="reminder-text">Call Sarah Chen about the 296 GTB</span>
+        <span class="reminder-time">10:00 AM</span>
+      </li>
+      <li class="reminder">
+        <span class="reminder-check" aria-hidden="true"></span>
+        <span class="reminder-text">Follow up with Mike Rivera -- SF90 financing</span>
+        <span class="reminder-time">2:00 PM</span>
+      </li>
+      <li class="reminder">
+        <span class="reminder-check" aria-hidden="true"></span>
+        <span class="reminder-text">Send Jim Bradshaw photos of the 488 Spider</span>
+        <span class="reminder-time">4:30 PM</span>
+      </li></ul>
+    </section>
+      
+    <section class="panel lineup-panel">
+      <header class="panel-head">
+        <h2 class="panel-title">To order</h2>
+        <span class="panel-meta">20 cars · corporate lineup</span>
+      </header>
+      <ul class="lineup"><li class="lineup-row"><span class="lineup-name">Ferrari 12Cilindri</span><span class="lineup-count">1</span></li><li class="lineup-row"><span class="lineup-name">Ferrari 12Cilindri Spider</span><span class="lineup-count">1</span></li><li class="lineup-row"><span class="lineup-name">Ferrari 296 GTB</span><span class="lineup-count">1</span></li><li class="lineup-row"><span class="lineup-name">Ferrari 296 GTS</span><span class="lineup-count">1</span></li><li class="lineup-row"><span class="lineup-name">Ferrari 296 Speciale</span><span class="lineup-count">1</span></li><li class="lineup-row"><span class="lineup-name">Ferrari 296 Speciale A</span><span class="lineup-count">1</span></li><li class="lineup-row"><span class="lineup-name">Ferrari 812 Competizione</span><span class="lineup-count">1</span></li><li class="lineup-row"><span class="lineup-name">Ferrari 812 Competizione A</span><span class="lineup-count">1</span></li><li class="lineup-row"><span class="lineup-name">Ferrari 849 Testarossa</span><span class="lineup-count">1</span></li><li class="lineup-row"><span class="lineup-name">Ferrari 849 Testarossa Spider</span><span class="lineup-count">1</span></li><li class="lineup-row"><span class="lineup-name">Ferrari Amalfi</span><span class="lineup-count">1</span></li><li class="lineup-row"><span class="lineup-name">Ferrari Amalfi Spider</span><span class="lineup-count">1</span></li><li class="lineup-row"><span class="lineup-name">Ferrari Daytona SP3</span><span class="lineup-count">1</span></li><li class="lineup-row"><span class="lineup-name">Ferrari F80</span><span class="lineup-count">1</span></li><li class="lineup-row"><span class="lineup-name">Ferrari Luce</span><span class="lineup-count">1</span></li><li class="lineup-row"><span class="lineup-name">Ferrari Monza SP1</span><span class="lineup-count">1</span></li><li class="lineup-row"><span class="lineup-name">Ferrari Monza SP2</span><span class="lineup-count">1</span></li><li class="lineup-row"><span class="lineup-name">Ferrari Purosangue</span><span class="lineup-count">1</span></li><li class="lineup-row"><span class="lineup-name">Ferrari SF90 XX Spider</span><span class="lineup-count">1</span></li><li class="lineup-row"><span class="lineup-name">Ferrari SF90 XX Stradale</span><span class="lineup-count">1</span></li></ul>
+    </section>
+    </div>
 
     <footer>
       <span>Bud's Dashboard · Sales Assistant</span>
       <span><a href="about.html">About / SMS policy</a></span>
     </footer>
 
-  </div>
+  </main>
 </body>
 </html>
