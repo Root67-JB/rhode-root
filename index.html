@@ -10,7 +10,10 @@
   <style>
     /* Reset + base */
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    html { -webkit-text-size-adjust: 100%; }
+    html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+    /* Cards that anchor a model jump need scroll-margin so they land
+       below the viewport's top edge, not flush against it. */
+    .card[id^="m-"] { scroll-margin-top: 24px; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
       -webkit-font-smoothing: antialiased;
@@ -162,7 +165,7 @@
       gap: 6px;
       margin-bottom: 18px;
     }
-    .chip {
+    a.chip {
       display: inline-flex;
       align-items: center;
       gap: 6px;
@@ -172,7 +175,16 @@
       border-radius: 999px;
       font-size: 12px;
       font-weight: 500;
+      text-decoration: none;
+      transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+      cursor: pointer;
     }
+    a.chip:hover {
+      background: var(--accent-soft);
+      border-color: var(--accent);
+      transform: translateY(-1px);
+    }
+    a.chip:active { transform: translateY(0); }
     .chip-name { color: var(--ink); }
     .chip-count {
       background: var(--accent-soft);
@@ -184,6 +196,7 @@
       min-width: 18px;
       text-align: center;
     }
+    a.chip:hover .chip-count { background: var(--accent); color: #fff; }
 
     /* Card grid -- single dense grid, sorted by model alphabetically */
     .grid {
@@ -372,16 +385,76 @@
       white-space: nowrap;
     }
 
-    .lineup { list-style: none; columns: 2; column-gap: 24px; }
-    .lineup-row {
-      display: flex;
-      justify-content: space-between;
-      padding: 6px 0;
-      font-size: 14px;
-      break-inside: avoid;
+    /* Lineup -- grouped by model, each car a clickable link to the
+       corporate listing. */
+    .lineup-groups {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
     }
-    .lineup-name { color: var(--ink); }
-    .lineup-count { color: var(--ink-3); font-variant-numeric: tabular-nums; }
+    .lineup-group {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--bg-elev);
+      overflow: hidden;
+    }
+    .lineup-group-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      padding: 10px 14px;
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+    }
+    .lineup-group-name {
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: var(--ink);
+    }
+    .lineup-group-count {
+      font-size: 11px;
+      color: var(--accent);
+      background: var(--accent-soft);
+      font-weight: 700;
+      padding: 1px 7px;
+      border-radius: 999px;
+      min-width: 18px;
+      text-align: center;
+    }
+    .lineup-cars { list-style: none; }
+    .lineup-car { border-bottom: 1px solid var(--border); }
+    .lineup-car:last-child { border-bottom: none; }
+    .lineup-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 14px;
+      font-size: 13px;
+      text-decoration: none;
+      color: var(--ink);
+      transition: background 0.12s ease;
+    }
+    .lineup-link:hover { background: var(--accent-soft); color: var(--accent); }
+    .lineup-link.disabled { cursor: default; color: var(--ink-3); }
+    .lineup-link.disabled:hover { background: transparent; color: var(--ink-3); }
+    .lineup-label { flex: 1; min-width: 0; }
+    .lineup-stock {
+      font-size: 11px;
+      color: var(--ink-3);
+      font-variant-numeric: tabular-nums;
+      font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+      white-space: nowrap;
+    }
+    .lineup-arrow {
+      font-size: 13px;
+      color: var(--ink-3);
+      transition: transform 0.15s ease, color 0.15s ease;
+    }
+    .lineup-link:hover .lineup-arrow { color: var(--accent); transform: translate(2px, -2px); }
+    @media (min-width: 720px) {
+      .lineup-groups { grid-template-columns: 1fr 1fr; }
+    }
 
     /* Two-panel side-by-side row */
     .side-by-side {
@@ -442,7 +515,7 @@
 <body>
   <main class="container">
 
-    <div class="preview-banner">Static snapshot · 4:34 PM</div>
+    <div class="preview-banner">Static snapshot · 4:43 PM</div>
 
     <header>
       <div class="bebe" data-placeholder="true" aria-label="Bebe the yellow lab"></div>
@@ -473,11 +546,11 @@
 
     <h2 class="section-title">On the lot <span class="count">20 cars · 14 models</span></h2>
 
-    <div class="model-index" aria-label="Models on lot"><span class="chip"><span class="chip-name">12Cilindri</span><span class="chip-count">1</span></span><span class="chip"><span class="chip-name">296 GTS</span><span class="chip-count">1</span></span><span class="chip"><span class="chip-name">458 Italia</span><span class="chip-count">2</span></span><span class="chip"><span class="chip-name">488 GTB</span><span class="chip-count">1</span></span><span class="chip"><span class="chip-name">488 Pista</span><span class="chip-count">3</span></span><span class="chip"><span class="chip-name">488 Spider</span><span class="chip-count">3</span></span><span class="chip"><span class="chip-name">California T</span><span class="chip-count">1</span></span><span class="chip"><span class="chip-name">F12 TDF</span><span class="chip-count">1</span></span><span class="chip"><span class="chip-name">F8 Spider</span><span class="chip-count">1</span></span><span class="chip"><span class="chip-name">F8 Tributo</span><span class="chip-count">1</span></span><span class="chip"><span class="chip-name">Portofino</span><span class="chip-count">1</span></span><span class="chip"><span class="chip-name">Portofino M</span><span class="chip-count">2</span></span><span class="chip"><span class="chip-name">Roma</span><span class="chip-count">1</span></span><span class="chip"><span class="chip-name">SF90 Spider</span><span class="chip-count">1</span></span></div>
+    <nav class="model-index" aria-label="Jump to model"><a class="chip" href="#m-12cilindri" title="Jump to 12Cilindri"><span class="chip-name">12Cilindri</span><span class="chip-count">1</span></a><a class="chip" href="#m-296-gts" title="Jump to 296 GTS"><span class="chip-name">296 GTS</span><span class="chip-count">1</span></a><a class="chip" href="#m-458-italia" title="Jump to 458 Italia"><span class="chip-name">458 Italia</span><span class="chip-count">2</span></a><a class="chip" href="#m-488-gtb" title="Jump to 488 GTB"><span class="chip-name">488 GTB</span><span class="chip-count">1</span></a><a class="chip" href="#m-488-pista" title="Jump to 488 Pista"><span class="chip-name">488 Pista</span><span class="chip-count">3</span></a><a class="chip" href="#m-488-spider" title="Jump to 488 Spider"><span class="chip-name">488 Spider</span><span class="chip-count">3</span></a><a class="chip" href="#m-california-t" title="Jump to California T"><span class="chip-name">California T</span><span class="chip-count">1</span></a><a class="chip" href="#m-f12-tdf" title="Jump to F12 TDF"><span class="chip-name">F12 TDF</span><span class="chip-count">1</span></a><a class="chip" href="#m-f8-spider" title="Jump to F8 Spider"><span class="chip-name">F8 Spider</span><span class="chip-count">1</span></a><a class="chip" href="#m-f8-tributo" title="Jump to F8 Tributo"><span class="chip-name">F8 Tributo</span><span class="chip-count">1</span></a><a class="chip" href="#m-portofino" title="Jump to Portofino"><span class="chip-name">Portofino</span><span class="chip-count">1</span></a><a class="chip" href="#m-portofino-m" title="Jump to Portofino M"><span class="chip-name">Portofino M</span><span class="chip-count">2</span></a><a class="chip" href="#m-roma" title="Jump to Roma"><span class="chip-name">Roma</span><span class="chip-count">1</span></a><a class="chip" href="#m-sf90-spider" title="Jump to SF90 Spider"><span class="chip-name">SF90 Spider</span><span class="chip-count">1</span></a></nav>
 
     <div class="grid">
       
-    <article class="card">
+    <article class="card" id="m-12cilindri">
       <a class="card-link" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2025-ferrari-12cilindri-base-rwd-2d-coupe-zff10xla6s0321272/" target="_blank" rel="noopener noreferrer" aria-label="Open 2025 12Cilindri listing on ferrariofpalmbeach.com (new tab)" title="Open listing on ferrariofpalmbeach.com">
         <div class="card-photo">
           <span class="card-model">12Cilindri</span>
@@ -493,7 +566,7 @@
         </div>
       </a>
     </article>
-    <article class="card">
+    <article class="card" id="m-296-gts">
       <a class="card-link" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2025-ferrari-296-gts-rwd-2d-convertible-zff01sma8s0320277/" target="_blank" rel="noopener noreferrer" aria-label="Open 2025 296 GTS listing on ferrariofpalmbeach.com (new tab)" title="Open listing on ferrariofpalmbeach.com">
         <div class="card-photo">
           <span class="card-model">296 GTS</span>
@@ -509,7 +582,7 @@
         </div>
       </a>
     </article>
-    <article class="card">
+    <article class="card" id="m-458-italia">
       <a class="card-link" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2013-ferrari-458-italia-base-rwd-2d-coupe-zff67nfa4d0190735/" target="_blank" rel="noopener noreferrer" aria-label="Open 2013 458 Italia listing on ferrariofpalmbeach.com (new tab)" title="Open listing on ferrariofpalmbeach.com">
         <div class="card-photo">
           <span class="card-model">458 Italia</span>
@@ -541,7 +614,7 @@
         </div>
       </a>
     </article>
-    <article class="card">
+    <article class="card" id="m-488-gtb">
       <a class="card-link" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2019-ferrari-488-gtb-base-rwd-2d-coupe-zff79ala7k0239502/" target="_blank" rel="noopener noreferrer" aria-label="Open 2019 488 GTB listing on ferrariofpalmbeach.com (new tab)" title="Open listing on ferrariofpalmbeach.com">
         <div class="card-photo">
           <span class="card-model">488 GTB</span>
@@ -557,7 +630,7 @@
         </div>
       </a>
     </article>
-    <article class="card">
+    <article class="card" id="m-488-pista">
       <a class="card-link" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2020-ferrari-488-pista-base-rwd-2d-convertible-zff91hma2l0253378/" target="_blank" rel="noopener noreferrer" aria-label="Open 2020 488 Pista listing on ferrariofpalmbeach.com (new tab)" title="Open listing on ferrariofpalmbeach.com">
         <div class="card-photo">
           <span class="card-model">488 Pista</span>
@@ -605,7 +678,7 @@
         </div>
       </a>
     </article>
-    <article class="card">
+    <article class="card" id="m-488-spider">
       <a class="card-link" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2019-ferrari-488-spider-base-rwd-2d-convertible-zff80ama5k0241259/" target="_blank" rel="noopener noreferrer" aria-label="Open 2019 488 Spider listing on ferrariofpalmbeach.com (new tab)" title="Open listing on ferrariofpalmbeach.com">
         <div class="card-photo">
           <span class="card-model">488 Spider</span>
@@ -653,7 +726,7 @@
         </div>
       </a>
     </article>
-    <article class="card">
+    <article class="card" id="m-california-t">
       <a class="card-link" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2017-ferrari-california-t-rwd-2d-convertible-zff77xja8h0228075/" target="_blank" rel="noopener noreferrer" aria-label="Open 2017 California T listing on ferrariofpalmbeach.com (new tab)" title="Open listing on ferrariofpalmbeach.com">
         <div class="card-photo">
           <span class="card-model">California T</span>
@@ -669,7 +742,7 @@
         </div>
       </a>
     </article>
-    <article class="card">
+    <article class="card" id="m-f12-tdf">
       <a class="card-link" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2017-ferrari-f12-tdf-base-rwd-2d-coupe-zff81bfa7h0224245/" target="_blank" rel="noopener noreferrer" aria-label="Open 2017 F12 TDF listing on ferrariofpalmbeach.com (new tab)" title="Open listing on ferrariofpalmbeach.com">
         <div class="card-photo">
           <span class="card-model">F12 TDF</span>
@@ -685,7 +758,7 @@
         </div>
       </a>
     </article>
-    <article class="card">
+    <article class="card" id="m-f8-spider">
       <a class="card-link" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2021-ferrari-f8-spider-base-rwd-2d-convertible-zff93lmaxm0264062/" target="_blank" rel="noopener noreferrer" aria-label="Open 2021 F8 Spider listing on ferrariofpalmbeach.com (new tab)" title="Open listing on ferrariofpalmbeach.com">
         <div class="card-photo">
           <span class="card-model">F8 Spider</span>
@@ -701,7 +774,7 @@
         </div>
       </a>
     </article>
-    <article class="card">
+    <article class="card" id="m-f8-tributo">
       <a class="card-link" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2020-ferrari-f8-tributo-base-rwd-2d-coupe-zff92lla5l0253473/" target="_blank" rel="noopener noreferrer" aria-label="Open 2020 F8 Tributo listing on ferrariofpalmbeach.com (new tab)" title="Open listing on ferrariofpalmbeach.com">
         <div class="card-photo">
           <span class="card-model">F8 Tributo</span>
@@ -717,7 +790,7 @@
         </div>
       </a>
     </article>
-    <article class="card">
+    <article class="card" id="m-portofino">
       <a class="card-link" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2019-ferrari-portofino-base-rwd-2d-convertible-zff89fpa1k0240947/" target="_blank" rel="noopener noreferrer" aria-label="Open 2019 Portofino listing on ferrariofpalmbeach.com (new tab)" title="Open listing on ferrariofpalmbeach.com">
         <div class="card-photo">
           <span class="card-model">Portofino</span>
@@ -733,7 +806,7 @@
         </div>
       </a>
     </article>
-    <article class="card">
+    <article class="card" id="m-portofino-m">
       <a class="card-link" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2023-ferrari-portofino-m-base-rwd-2d-convertible-zff02rpa4p0289019/" target="_blank" rel="noopener noreferrer" aria-label="Open 2023 Portofino M listing on ferrariofpalmbeach.com (new tab)" title="Open listing on ferrariofpalmbeach.com">
         <div class="card-photo">
           <span class="card-model">Portofino M</span>
@@ -765,7 +838,7 @@
         </div>
       </a>
     </article>
-    <article class="card">
+    <article class="card" id="m-roma">
       <a class="card-link" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2025-ferrari-roma-base-rwd-2d-convertible-zff09rpa9s0317692/" target="_blank" rel="noopener noreferrer" aria-label="Open 2025 Roma listing on ferrariofpalmbeach.com (new tab)" title="Open listing on ferrariofpalmbeach.com">
         <div class="card-photo">
           <span class="card-model">Roma</span>
@@ -781,7 +854,7 @@
         </div>
       </a>
     </article>
-    <article class="card">
+    <article class="card" id="m-sf90-spider">
       <a class="card-link" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2024-ferrari-sf90-spider-base-awd-2d-convertible-zff96nma1r0309707/" target="_blank" rel="noopener noreferrer" aria-label="Open 2024 SF90 Spider listing on ferrariofpalmbeach.com (new tab)" title="Open listing on ferrariofpalmbeach.com">
         <div class="card-photo">
           <span class="card-model">SF90 Spider</span>
@@ -827,9 +900,229 @@
     <section class="panel lineup-panel">
       <header class="panel-head">
         <h2 class="panel-title">To order</h2>
-        <span class="panel-meta">20 cars · corporate lineup</span>
+        <span class="panel-meta">20 cars · 20 models</span>
       </header>
-      <ul class="lineup"><li class="lineup-row"><span class="lineup-name">Ferrari 12Cilindri</span><span class="lineup-count">1</span></li><li class="lineup-row"><span class="lineup-name">Ferrari 12Cilindri Spider</span><span class="lineup-count">1</span></li><li class="lineup-row"><span class="lineup-name">Ferrari 296 GTB</span><span class="lineup-count">1</span></li><li class="lineup-row"><span class="lineup-name">Ferrari 296 GTS</span><span class="lineup-count">1</span></li><li class="lineup-row"><span class="lineup-name">Ferrari 296 Speciale</span><span class="lineup-count">1</span></li><li class="lineup-row"><span class="lineup-name">Ferrari 296 Speciale A</span><span class="lineup-count">1</span></li><li class="lineup-row"><span class="lineup-name">Ferrari 812 Competizione</span><span class="lineup-count">1</span></li><li class="lineup-row"><span class="lineup-name">Ferrari 812 Competizione A</span><span class="lineup-count">1</span></li><li class="lineup-row"><span class="lineup-name">Ferrari 849 Testarossa</span><span class="lineup-count">1</span></li><li class="lineup-row"><span class="lineup-name">Ferrari 849 Testarossa Spider</span><span class="lineup-count">1</span></li><li class="lineup-row"><span class="lineup-name">Ferrari Amalfi</span><span class="lineup-count">1</span></li><li class="lineup-row"><span class="lineup-name">Ferrari Amalfi Spider</span><span class="lineup-count">1</span></li><li class="lineup-row"><span class="lineup-name">Ferrari Daytona SP3</span><span class="lineup-count">1</span></li><li class="lineup-row"><span class="lineup-name">Ferrari F80</span><span class="lineup-count">1</span></li><li class="lineup-row"><span class="lineup-name">Ferrari Luce</span><span class="lineup-count">1</span></li><li class="lineup-row"><span class="lineup-name">Ferrari Monza SP1</span><span class="lineup-count">1</span></li><li class="lineup-row"><span class="lineup-name">Ferrari Monza SP2</span><span class="lineup-count">1</span></li><li class="lineup-row"><span class="lineup-name">Ferrari Purosangue</span><span class="lineup-count">1</span></li><li class="lineup-row"><span class="lineup-name">Ferrari SF90 XX Spider</span><span class="lineup-count">1</span></li><li class="lineup-row"><span class="lineup-name">Ferrari SF90 XX Stradale</span><span class="lineup-count">1</span></li></ul>
+      <div class="lineup-groups">
+      <section class="lineup-group">
+        <header class="lineup-group-head">
+          <h3 class="lineup-group-name">Ferrari 12Cilindri</h3>
+          <span class="lineup-group-count">1</span>
+        </header>
+        <ul class="lineup-cars"><li class="lineup-car"><a class="lineup-link" href="https://palmbeach.ferraridealers.com/en-US/ferrari-12cilindri" target="_blank" rel="noopener noreferrer" title="Open on corporate site">
+          <span class="lineup-label">Configure</span>
+          
+          <span class="lineup-arrow" aria-hidden="true">↗</span>
+        </a></li></ul>
+      </section>
+      <section class="lineup-group">
+        <header class="lineup-group-head">
+          <h3 class="lineup-group-name">Ferrari 12Cilindri Spider</h3>
+          <span class="lineup-group-count">1</span>
+        </header>
+        <ul class="lineup-cars"><li class="lineup-car"><a class="lineup-link" href="https://palmbeach.ferraridealers.com/en-US/ferrari-12cilindri-spider" target="_blank" rel="noopener noreferrer" title="Open on corporate site">
+          <span class="lineup-label">Configure</span>
+          
+          <span class="lineup-arrow" aria-hidden="true">↗</span>
+        </a></li></ul>
+      </section>
+      <section class="lineup-group">
+        <header class="lineup-group-head">
+          <h3 class="lineup-group-name">Ferrari 296 GTB</h3>
+          <span class="lineup-group-count">1</span>
+        </header>
+        <ul class="lineup-cars"><li class="lineup-car"><a class="lineup-link" href="https://palmbeach.ferraridealers.com/en-US/296-gtb" target="_blank" rel="noopener noreferrer" title="Open on corporate site">
+          <span class="lineup-label">Configure</span>
+          
+          <span class="lineup-arrow" aria-hidden="true">↗</span>
+        </a></li></ul>
+      </section>
+      <section class="lineup-group">
+        <header class="lineup-group-head">
+          <h3 class="lineup-group-name">Ferrari 296 GTS</h3>
+          <span class="lineup-group-count">1</span>
+        </header>
+        <ul class="lineup-cars"><li class="lineup-car"><a class="lineup-link" href="https://palmbeach.ferraridealers.com/en-US/296-gts" target="_blank" rel="noopener noreferrer" title="Open on corporate site">
+          <span class="lineup-label">Configure</span>
+          
+          <span class="lineup-arrow" aria-hidden="true">↗</span>
+        </a></li></ul>
+      </section>
+      <section class="lineup-group">
+        <header class="lineup-group-head">
+          <h3 class="lineup-group-name">Ferrari 296 Speciale</h3>
+          <span class="lineup-group-count">1</span>
+        </header>
+        <ul class="lineup-cars"><li class="lineup-car"><a class="lineup-link" href="https://palmbeach.ferraridealers.com/en-US/296-speciale" target="_blank" rel="noopener noreferrer" title="Open on corporate site">
+          <span class="lineup-label">Configure</span>
+          
+          <span class="lineup-arrow" aria-hidden="true">↗</span>
+        </a></li></ul>
+      </section>
+      <section class="lineup-group">
+        <header class="lineup-group-head">
+          <h3 class="lineup-group-name">Ferrari 296 Speciale A</h3>
+          <span class="lineup-group-count">1</span>
+        </header>
+        <ul class="lineup-cars"><li class="lineup-car"><a class="lineup-link" href="https://palmbeach.ferraridealers.com/en-US/296-speciale-a" target="_blank" rel="noopener noreferrer" title="Open on corporate site">
+          <span class="lineup-label">Configure</span>
+          
+          <span class="lineup-arrow" aria-hidden="true">↗</span>
+        </a></li></ul>
+      </section>
+      <section class="lineup-group">
+        <header class="lineup-group-head">
+          <h3 class="lineup-group-name">Ferrari 812 Competizione</h3>
+          <span class="lineup-group-count">1</span>
+        </header>
+        <ul class="lineup-cars"><li class="lineup-car"><a class="lineup-link" href="https://palmbeach.ferraridealers.com/en-US/812-competizione" target="_blank" rel="noopener noreferrer" title="Open on corporate site">
+          <span class="lineup-label">Configure</span>
+          
+          <span class="lineup-arrow" aria-hidden="true">↗</span>
+        </a></li></ul>
+      </section>
+      <section class="lineup-group">
+        <header class="lineup-group-head">
+          <h3 class="lineup-group-name">Ferrari 812 Competizione A</h3>
+          <span class="lineup-group-count">1</span>
+        </header>
+        <ul class="lineup-cars"><li class="lineup-car"><a class="lineup-link" href="https://palmbeach.ferraridealers.com/en-US/812-competizione-a" target="_blank" rel="noopener noreferrer" title="Open on corporate site">
+          <span class="lineup-label">Configure</span>
+          
+          <span class="lineup-arrow" aria-hidden="true">↗</span>
+        </a></li></ul>
+      </section>
+      <section class="lineup-group">
+        <header class="lineup-group-head">
+          <h3 class="lineup-group-name">Ferrari 849 Testarossa</h3>
+          <span class="lineup-group-count">1</span>
+        </header>
+        <ul class="lineup-cars"><li class="lineup-car"><a class="lineup-link" href="https://palmbeach.ferraridealers.com/en-US/849-testarossa" target="_blank" rel="noopener noreferrer" title="Open on corporate site">
+          <span class="lineup-label">Configure</span>
+          
+          <span class="lineup-arrow" aria-hidden="true">↗</span>
+        </a></li></ul>
+      </section>
+      <section class="lineup-group">
+        <header class="lineup-group-head">
+          <h3 class="lineup-group-name">Ferrari 849 Testarossa Spider</h3>
+          <span class="lineup-group-count">1</span>
+        </header>
+        <ul class="lineup-cars"><li class="lineup-car"><a class="lineup-link" href="https://palmbeach.ferraridealers.com/en-US/849-testarossa-spider" target="_blank" rel="noopener noreferrer" title="Open on corporate site">
+          <span class="lineup-label">Configure</span>
+          
+          <span class="lineup-arrow" aria-hidden="true">↗</span>
+        </a></li></ul>
+      </section>
+      <section class="lineup-group">
+        <header class="lineup-group-head">
+          <h3 class="lineup-group-name">Ferrari Amalfi</h3>
+          <span class="lineup-group-count">1</span>
+        </header>
+        <ul class="lineup-cars"><li class="lineup-car"><a class="lineup-link" href="https://palmbeach.ferraridealers.com/en-US/ferrari-amalfi" target="_blank" rel="noopener noreferrer" title="Open on corporate site">
+          <span class="lineup-label">Configure</span>
+          
+          <span class="lineup-arrow" aria-hidden="true">↗</span>
+        </a></li></ul>
+      </section>
+      <section class="lineup-group">
+        <header class="lineup-group-head">
+          <h3 class="lineup-group-name">Ferrari Amalfi Spider</h3>
+          <span class="lineup-group-count">1</span>
+        </header>
+        <ul class="lineup-cars"><li class="lineup-car"><a class="lineup-link" href="https://palmbeach.ferraridealers.com/en-US/ferrari-amalfi-spider" target="_blank" rel="noopener noreferrer" title="Open on corporate site">
+          <span class="lineup-label">Configure</span>
+          
+          <span class="lineup-arrow" aria-hidden="true">↗</span>
+        </a></li></ul>
+      </section>
+      <section class="lineup-group">
+        <header class="lineup-group-head">
+          <h3 class="lineup-group-name">Ferrari Daytona SP3</h3>
+          <span class="lineup-group-count">1</span>
+        </header>
+        <ul class="lineup-cars"><li class="lineup-car"><a class="lineup-link" href="https://palmbeach.ferraridealers.com/en-US/ferrari-daytona-sp3" target="_blank" rel="noopener noreferrer" title="Open on corporate site">
+          <span class="lineup-label">Configure</span>
+          
+          <span class="lineup-arrow" aria-hidden="true">↗</span>
+        </a></li></ul>
+      </section>
+      <section class="lineup-group">
+        <header class="lineup-group-head">
+          <h3 class="lineup-group-name">Ferrari F80</h3>
+          <span class="lineup-group-count">1</span>
+        </header>
+        <ul class="lineup-cars"><li class="lineup-car"><a class="lineup-link" href="https://palmbeach.ferraridealers.com/en-US/f80" target="_blank" rel="noopener noreferrer" title="Open on corporate site">
+          <span class="lineup-label">Configure</span>
+          
+          <span class="lineup-arrow" aria-hidden="true">↗</span>
+        </a></li></ul>
+      </section>
+      <section class="lineup-group">
+        <header class="lineup-group-head">
+          <h3 class="lineup-group-name">Ferrari Luce</h3>
+          <span class="lineup-group-count">1</span>
+        </header>
+        <ul class="lineup-cars"><li class="lineup-car"><a class="lineup-link" href="https://palmbeach.ferraridealers.com/en-US/ferrari-luce" target="_blank" rel="noopener noreferrer" title="Open on corporate site">
+          <span class="lineup-label">Configure</span>
+          
+          <span class="lineup-arrow" aria-hidden="true">↗</span>
+        </a></li></ul>
+      </section>
+      <section class="lineup-group">
+        <header class="lineup-group-head">
+          <h3 class="lineup-group-name">Ferrari Monza SP1</h3>
+          <span class="lineup-group-count">1</span>
+        </header>
+        <ul class="lineup-cars"><li class="lineup-car"><a class="lineup-link" href="https://www.ferrari.com/auto/monza-sp1" target="_blank" rel="noopener noreferrer" title="Open on corporate site">
+          <span class="lineup-label">Configure</span>
+          
+          <span class="lineup-arrow" aria-hidden="true">↗</span>
+        </a></li></ul>
+      </section>
+      <section class="lineup-group">
+        <header class="lineup-group-head">
+          <h3 class="lineup-group-name">Ferrari Monza SP2</h3>
+          <span class="lineup-group-count">1</span>
+        </header>
+        <ul class="lineup-cars"><li class="lineup-car"><a class="lineup-link" href="https://www.ferrari.com/auto/monza-sp2" target="_blank" rel="noopener noreferrer" title="Open on corporate site">
+          <span class="lineup-label">Configure</span>
+          
+          <span class="lineup-arrow" aria-hidden="true">↗</span>
+        </a></li></ul>
+      </section>
+      <section class="lineup-group">
+        <header class="lineup-group-head">
+          <h3 class="lineup-group-name">Ferrari Purosangue</h3>
+          <span class="lineup-group-count">1</span>
+        </header>
+        <ul class="lineup-cars"><li class="lineup-car"><a class="lineup-link" href="https://palmbeach.ferraridealers.com/en-US/ferrari-purosangue" target="_blank" rel="noopener noreferrer" title="Open on corporate site">
+          <span class="lineup-label">Configure</span>
+          
+          <span class="lineup-arrow" aria-hidden="true">↗</span>
+        </a></li></ul>
+      </section>
+      <section class="lineup-group">
+        <header class="lineup-group-head">
+          <h3 class="lineup-group-name">Ferrari SF90 XX Spider</h3>
+          <span class="lineup-group-count">1</span>
+        </header>
+        <ul class="lineup-cars"><li class="lineup-car"><a class="lineup-link" href="https://palmbeach.ferraridealers.com/en-US/sf90-xx-spider" target="_blank" rel="noopener noreferrer" title="Open on corporate site">
+          <span class="lineup-label">Configure</span>
+          
+          <span class="lineup-arrow" aria-hidden="true">↗</span>
+        </a></li></ul>
+      </section>
+      <section class="lineup-group">
+        <header class="lineup-group-head">
+          <h3 class="lineup-group-name">Ferrari SF90 XX Stradale</h3>
+          <span class="lineup-group-count">1</span>
+        </header>
+        <ul class="lineup-cars"><li class="lineup-car"><a class="lineup-link" href="https://palmbeach.ferraridealers.com/en-US/sf90-xx-stradale" target="_blank" rel="noopener noreferrer" title="Open on corporate site">
+          <span class="lineup-label">Configure</span>
+          
+          <span class="lineup-arrow" aria-hidden="true">↗</span>
+        </a></li></ul>
+      </section></div>
     </section>
     </div>
 
