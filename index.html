@@ -100,42 +100,40 @@
     }
     .greeting .date .stale { color: var(--accent); font-weight: 600; }
 
-    /* Snapshot strip -- single horizontal row of inline stats */
-    .snapshot {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0;
+    /* Top row -- reminders panel + cars-for-sale count tile, side-by-side. */
+    .top-row {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+    .count-tile {
       background: var(--bg-card);
       border: 1px solid var(--border);
       border-radius: 14px;
-      padding: 14px 4px;
-      margin-bottom: 24px;
+      padding: 24px 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
       box-shadow: var(--shadow-sm);
     }
-    .stat {
-      flex: 1;
-      min-width: 100px;
-      text-align: center;
-      padding: 4px 16px;
-      border-right: 1px solid var(--border);
-    }
-    .stat:last-child { border-right: none; }
-    .stat-num {
-      font-size: 28px;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-      line-height: 1.1;
-      margin-bottom: 2px;
+    .count-num {
+      font-size: 80px;
+      font-weight: 800;
+      line-height: 0.95;
+      letter-spacing: -0.04em;
+      color: var(--ink);
       font-variant-numeric: tabular-nums;
     }
-    .stat-num.gold { color: var(--gold); }
-    .stat-num.accent { color: var(--accent); }
-    .stat-label {
+    .count-label {
       font-size: 11px;
-      letter-spacing: 0.06em;
+      letter-spacing: 0.1em;
       text-transform: uppercase;
       color: var(--ink-3);
-      font-weight: 600;
+      font-weight: 700;
+      margin-top: 10px;
     }
 
     /* Section heading */
@@ -449,12 +447,52 @@
     .chip.active .chip-name { color: #fff; }
     .chip.active .chip-count { background: rgba(255,255,255,0.25); color: #fff; }
 
-    /* Two-panel side-by-side row */
-    .side-by-side {
+    /* Sold or pulled grid -- compact, muted treatment */
+    .removed-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-      margin-top: 32px;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+    .removed-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      opacity: 0.86;
+      transition: opacity 0.15s ease;
+    }
+    .removed-card:hover { opacity: 1; }
+    .removed-card .card-photo { aspect-ratio: 4 / 3; position: relative; overflow: hidden; }
+    .removed-card .card-photo-img.grayscale {
+      filter: grayscale(0.85) brightness(0.85);
+      transition: filter 0.3s ease;
+    }
+    .removed-card:hover .card-photo-img.grayscale { filter: grayscale(0.4) brightness(0.95); }
+    .card-model.muted, .card-year.muted {
+      background: rgba(0,0,0,0.55);
+      opacity: 0.85;
+    }
+    .badge-removed {
+      position: absolute;
+      bottom: 8px;
+      left: 8px;
+      background: rgba(0, 0, 0, 0.78);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      color: #fff;
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      padding: 3px 7px;
+      border-radius: 4px;
+      z-index: 3;
+    }
+    .card-price.strike {
+      text-decoration: line-through;
+      text-decoration-thickness: 1.5px;
+      color: var(--ink-3);
+      font-weight: 600;
     }
 
     /* Footer */
@@ -491,13 +529,13 @@
       .container { padding: 20px 16px 64px; }
       .greeting h1 { font-size: 22px; }
       .bebe { width: 48px; height: 48px; font-size: 24px; }
-      .snapshot { padding: 10px 4px; }
-      .stat { padding: 4px 8px; min-width: 80px; }
-      .stat-num { font-size: 22px; }
+      .top-row { grid-template-columns: 1fr; gap: 12px; }
+      .count-tile { padding: 18px; }
+      .count-num { font-size: 60px; }
       .grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
       .card-cue { opacity: 0.85; }
-      .lineup { columns: 1; }
-      .side-by-side { grid-template-columns: 1fr; }
+      .removed-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+      .lineup { grid-template-columns: 1fr; }
     }
 
     @media (min-width: 1100px) {
@@ -508,7 +546,7 @@
 <body>
   <main class="container">
 
-    <div class="preview-banner">Static snapshot · 4:53 PM</div>
+    <div class="preview-banner">Static snapshot · 5:05 PM</div>
 
     <header>
       <div class="bebe" data-placeholder="true" aria-label="Bebe the yellow lab"></div>
@@ -518,23 +556,35 @@
       </div>
     </header>
 
-    <div class="snapshot">
-      <div class="stat">
-        <div class="stat-num">20</div>
-        <div class="stat-label">On Lot</div>
-      </div>
-      <div class="stat">
-        <div class="stat-num">$13.4M</div>
-        <div class="stat-label">Lot Value</div>
-      </div>
-      <div class="stat">
-        <div class="stat-num gold">0</div>
-        <div class="stat-label">Pending</div>
-      </div>
-      <div class="stat">
-        <div class="stat-num">20</div>
-        <div class="stat-label">To Order</div>
-      </div>
+    <div class="top-row">
+      
+    <section class="panel reminders-panel">
+      <header class="panel-head">
+        <h2 class="panel-title">Today's reminders</h2>
+        <span class="panel-meta">3 due</span>
+      </header>
+      <ul class="reminders">
+      <li class="reminder">
+        <span class="reminder-check" aria-hidden="true"></span>
+        <span class="reminder-text">Call Sarah Chen about the 296 GTB</span>
+        <span class="reminder-time">10:00 AM</span>
+      </li>
+      <li class="reminder">
+        <span class="reminder-check" aria-hidden="true"></span>
+        <span class="reminder-text">Follow up with Mike Rivera -- SF90 financing</span>
+        <span class="reminder-time">2:00 PM</span>
+      </li>
+      <li class="reminder">
+        <span class="reminder-check" aria-hidden="true"></span>
+        <span class="reminder-text">Send Jim Bradshaw photos of the 488 Spider</span>
+        <span class="reminder-time">4:30 PM</span>
+      </li></ul>
+    </section>
+      
+    <section class="count-tile" aria-label="20 cars for sale">
+      <div class="count-num">20</div>
+      <div class="count-label">Cars for sale</div>
+    </section>
     </div>
 
     <h2 class="section-title">On the lot <span class="count">20 cars · 14 models</span></h2>
@@ -865,31 +915,167 @@
     </article>
     </div>
 
-    <div class="side-by-side">
-      
-    <section class="panel reminders-panel">
-      <header class="panel-head">
-        <h2 class="panel-title">Today's reminders</h2>
-        <span class="panel-meta">3 due</span>
-      </header>
-      <ul class="reminders">
-      <li class="reminder">
-        <span class="reminder-check" aria-hidden="true"></span>
-        <span class="reminder-text">Call Sarah Chen about the 296 GTB</span>
-        <span class="reminder-time">10:00 AM</span>
-      </li>
-      <li class="reminder">
-        <span class="reminder-check" aria-hidden="true"></span>
-        <span class="reminder-text">Follow up with Mike Rivera -- SF90 financing</span>
-        <span class="reminder-time">2:00 PM</span>
-      </li>
-      <li class="reminder">
-        <span class="reminder-check" aria-hidden="true"></span>
-        <span class="reminder-text">Send Jim Bradshaw photos of the 488 Spider</span>
-        <span class="reminder-time">4:30 PM</span>
-      </li></ul>
-    </section>
-      
+    
+    <h2 class="section-title">Sold or pulled <span class="count">last 7 days · 12</span></h2>
+    <div class="removed-grid">
+    <article class="removed-card">
+      <div class="card-photo">
+        <span class="card-model muted">488 Spider</span>
+        <span class="card-year muted">2018</span>
+        <span class="badge badge-removed">GONE</span>
+        <img class="card-photo-img grayscale" src="https://vehicle-images.carscommerce.inc/c5d5-110007612/ZFF80AMA5J0235833/77e0c10aaf9000821c92f060b39ed2e0.webp" alt="2018 488 Spider" loading="lazy">
+      </div>
+      <div class="card-body">
+        <p class="card-meta">Giallo Modena · 6,115 mi</p>
+        <p class="card-price strike">$414,895</p>
+        <p class="card-tag">yesterday</p>
+      </div>
+    </article>
+    <article class="removed-card">
+      <div class="card-photo">
+        <span class="card-model muted">12Cilindri</span>
+        <span class="card-year muted">2025</span>
+        <span class="badge badge-removed">GONE</span>
+        <img class="card-photo-img grayscale" src="https://vehicle-images.carscommerce.inc/5dd6-110007612/ZFF10XLA6S0321272/2112e73bdeab72ee2f920db7202477e3.webp" alt="2025 12Cilindri" loading="lazy">
+      </div>
+      <div class="card-body">
+        <p class="card-meta">Giallo Triplo Strato · 1,550 mi</p>
+        <p class="card-price strike">$799,995</p>
+        <p class="card-tag">yesterday</p>
+      </div>
+    </article>
+    <article class="removed-card">
+      <div class="card-photo">
+        <span class="card-model muted">SF90 Spider</span>
+        <span class="card-year muted">2024</span>
+        <span class="badge badge-removed">GONE</span>
+        <img class="card-photo-img grayscale" src="https://vehicle-images.carscommerce.inc/c866-110007612/ZFF96NMA3R0304413/abcf22a9f9e698e0bae7017460a34295.webp" alt="2024 SF90 Spider" loading="lazy">
+      </div>
+      <div class="card-body">
+        <p class="card-meta">Rosso Libano · 1,220 mi</p>
+        <p class="card-price strike">$598,795</p>
+        <p class="card-tag">yesterday</p>
+      </div>
+    </article>
+    <article class="removed-card">
+      <div class="card-photo">
+        <span class="card-model muted">296 GTB</span>
+        <span class="card-year muted">2025</span>
+        <span class="badge badge-removed">GONE</span>
+        <img class="card-photo-img grayscale" src="https://vehicle-images.carscommerce.inc/b3ca-110007612/ZFF99SLA9S0314425/fe9e95750b213010a90139058628e8c7.webp" alt="2025 296 GTB" loading="lazy">
+      </div>
+      <div class="card-body">
+        <p class="card-meta">54 mi</p>
+        <p class="card-price strike">$368,895</p>
+        <p class="card-tag">yesterday</p>
+      </div>
+    </article>
+    <article class="removed-card">
+      <div class="card-photo">
+        <span class="card-model muted">Roma</span>
+        <span class="card-year muted">2025</span>
+        <span class="badge badge-removed">GONE</span>
+        <img class="card-photo-img grayscale" src="https://vehicle-images.carscommerce.inc/abad-110007612/ZFF09RPA8S0317344/cf543db58fb39ceb52a004789f90017a.webp" alt="2025 Roma" loading="lazy">
+      </div>
+      <div class="card-body">
+        <p class="card-meta">Blu Corsa · 896 mi</p>
+        <p class="card-price strike">$309,895</p>
+        <p class="card-tag">yesterday</p>
+      </div>
+    </article>
+    <article class="removed-card">
+      <div class="card-photo">
+        <span class="card-model muted">California T</span>
+        <span class="card-year muted">2017</span>
+        <span class="badge badge-removed">GONE</span>
+        <img class="card-photo-img grayscale" src="https://vehicle-images.carscommerce.inc/f5ce-110007612/ZFF77XJA8H0228075/0334a3936384b4ea5ea363b2f8daac6d.webp" alt="2017 California T" loading="lazy">
+      </div>
+      <div class="card-body">
+        <p class="card-meta">Azzurro Metallic · 6,808 mi</p>
+        <p class="card-price strike">$269,895</p>
+        <p class="card-tag">yesterday</p>
+      </div>
+    </article>
+    <article class="removed-card">
+      <div class="card-photo">
+        <span class="card-model muted">California</span>
+        <span class="card-year muted">2010</span>
+        <span class="badge badge-removed">GONE</span>
+        <img class="card-photo-img grayscale" src="https://vehicle-images.carscommerce.inc/a9dc-110007612/ZFF65LHA2A0174195/18bafc4ed4c85b06b37035a72c180602.webp" alt="2010 California" loading="lazy">
+      </div>
+      <div class="card-body">
+        <p class="card-meta">Bianco Avus · 25,548 mi</p>
+        <p class="card-price strike">$104,895</p>
+        <p class="card-tag">yesterday</p>
+      </div>
+    </article>
+    <article class="removed-card">
+      <div class="card-photo">
+        <span class="card-model muted">GTC4Lusso T</span>
+        <span class="card-year muted">2019</span>
+        <span class="badge badge-removed">GONE</span>
+        <img class="card-photo-img grayscale" src="https://vehicle-images.carscommerce.inc/214d-110007612/ZFF82YNA6K0239683/acad7736e272fac8a39a8703710088e5.webp" alt="2019 GTC4Lusso T" loading="lazy">
+      </div>
+      <div class="card-body">
+        <p class="card-meta">Grigio Titanio Metallic · 5,407 mi</p>
+        <p class="card-price strike">$224,995</p>
+        <p class="card-tag">yesterday</p>
+      </div>
+    </article>
+    <article class="removed-card">
+      <div class="card-photo">
+        <span class="card-model muted">488 Spider</span>
+        <span class="card-year muted">2018</span>
+        <span class="badge badge-removed">GONE</span>
+        <img class="card-photo-img grayscale" src="https://vehicle-images.carscommerce.inc/c5d5-110007612/ZFF80AMA5J0235833/77e0c10aaf9000821c92f060b39ed2e0.webp" alt="2018 488 Spider" loading="lazy">
+      </div>
+      <div class="card-body">
+        <p class="card-meta">Giallo Modena · 6,115 mi</p>
+        <p class="card-price strike">$414,895</p>
+        <p class="card-tag">2d ago</p>
+      </div>
+    </article>
+    <article class="removed-card">
+      <div class="card-photo">
+        <span class="card-model muted">Portofino M</span>
+        <span class="card-year muted">2023</span>
+        <span class="badge badge-removed">GONE</span>
+        <img class="card-photo-img grayscale" src="https://vehicle-images.carscommerce.inc/401c-110007612/ZFF02RPA4P0289019/543112bec11529a57f2f71fcc136860e.webp" alt="2023 Portofino M" loading="lazy">
+      </div>
+      <div class="card-body">
+        <p class="card-meta">Blu America · 405 mi</p>
+        <p class="card-price strike">$299,895</p>
+        <p class="card-tag">2d ago</p>
+      </div>
+    </article>
+    <article class="removed-card">
+      <div class="card-photo">
+        <span class="card-model muted">488 Spider</span>
+        <span class="card-year muted">2018</span>
+        <span class="badge badge-removed">GONE</span>
+        <img class="card-photo-img grayscale" src="https://vehicle-images.carscommerce.inc/e4ab-110007612/ZFF80AMA7J0233064/ef7a3cbc3add6e37547b80017ff31ca3.webp" alt="2018 488 Spider" loading="lazy">
+      </div>
+      <div class="card-body">
+        <p class="card-meta">Bianco Avus · 14,950 mi</p>
+        <p class="card-price strike">$334,995</p>
+        <p class="card-tag">2d ago</p>
+      </div>
+    </article>
+    <article class="removed-card">
+      <div class="card-photo">
+        <span class="card-model muted">Portofino M</span>
+        <span class="card-year muted">2022</span>
+        <span class="badge badge-removed">GONE</span>
+        <img class="card-photo-img grayscale" src="https://vehicle-images.carscommerce.inc/39df-110007612/ZFF02RPA0N0272540/48061079ddfe0d37ef46f5c78ea63dba.webp" alt="2022 Portofino M" loading="lazy">
+      </div>
+      <div class="card-body">
+        <p class="card-meta">Bianco Avus · 3,410 mi</p>
+        <p class="card-price strike">$273,895</p>
+        <p class="card-tag">2d ago</p>
+      </div>
+    </article></div>
+
+    
     <section class="panel lineup-panel">
       <header class="panel-head">
         <h2 class="panel-title">To order</h2>
@@ -957,7 +1143,6 @@
           <span class="lineup-item-arrow" aria-hidden="true">↗</span>
         </a></li></ul>
     </section>
-    </div>
 
     <footer>
       <span>Bud's Dashboard · Sales Assistant</span>
