@@ -574,6 +574,15 @@
        never-contacted (collapsed by default to suppress the long tail). */
     /* Phase 10 commit-1: cost panel */
     .cost-panel { margin: 32px 0; }
+    .cost-prelim {
+      background: rgba(244, 215, 110, 0.12);
+      border: 1px solid rgba(244, 215, 110, 0.4);
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
     .cost-summary {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -773,7 +782,7 @@
 <body>
   <main class="container">
 
-    <div class="preview-banner">Static snapshot · 6:15 PM</div>
+    <div class="preview-banner">Static snapshot · 6:30 PM</div>
 
     <header>
       <div class="bebe" aria-label="Bebe"><img src="bebe.jpg" alt="Bebe" width="56" height="56"></div>
@@ -1260,6 +1269,12 @@
     
     <section class="cost-panel">
       <h2 class="section-title">What it's costing</h2>
+      <div class="cost-prelim">
+        ⓘ Preliminary data — fixed monthly costs are accurate; variable
+        usage (voice, embeddings, SMS) only counts events recorded since
+        Phase 10 instrumentation went live and will fill in as the
+        assistant runs.
+      </div>
       <div class="cost-summary">
         <div class="cost-big">
           <div class="cost-big-label">Today (variable + fixed)</div>
