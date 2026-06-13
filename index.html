@@ -572,6 +572,98 @@
        wishlist panel -- this is a "work through this list" block, not
        "act on this NOW". Splits cold-engaged (always visible) from
        never-contacted (collapsed by default to suppress the long tail). */
+    /* Phase 10 commit-1: cost panel */
+    .cost-panel { margin: 32px 0; }
+    .cost-summary {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    .cost-big {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px 20px;
+    }
+    .cost-big-label {
+      font-size: 13px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 4px;
+    }
+    .cost-big-value {
+      font-size: 36px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 4px;
+    }
+    .cost-big-note {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .cost-table {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 8px 0;
+      margin-bottom: 16px;
+    }
+    .cost-row {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1.5fr;
+      gap: 12px;
+      padding: 10px 20px;
+      align-items: baseline;
+      border-bottom: 1px solid var(--border);
+    }
+    .cost-row:last-child { border-bottom: none; }
+    .cost-header {
+      font-size: 12px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      letter-spacing: 0.05em;
+      font-weight: 600;
+    }
+    .cost-svc { font-weight: 500; }
+    .cost-today, .cost-30d { font-variant-numeric: tabular-nums; font-weight: 500; }
+    .cost-events { font-size: 13px; color: var(--text-muted); text-align: right; }
+    .cost-fixed-details {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 20px;
+    }
+    .cost-fixed-details summary {
+      cursor: pointer;
+      font-weight: 500;
+      list-style: none;
+    }
+    .cost-fixed-details summary::before { content: "▸ "; }
+    .cost-fixed-details[open] summary::before { content: "▾ "; }
+    .cost-fixed-grid {
+      margin-top: 12px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px 24px;
+    }
+    .cost-fixed-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+    }
+    .cost-fixed-row > span:last-child {
+      font-variant-numeric: tabular-nums;
+      color: var(--text-muted);
+    }
+    @media (max-width: 720px) {
+      .cost-summary { grid-template-columns: 1fr; }
+      .cost-row { grid-template-columns: 2fr 1fr 1fr; }
+      .cost-events { display: none; }
+      .cost-fixed-grid { grid-template-columns: 1fr; }
+    }
+
     .neglect-panel { margin-top: 28px; }
     .neglect-list { list-style: none; }
     .neglect-row {
@@ -681,13 +773,13 @@
 <body>
   <main class="container">
 
-    <div class="preview-banner">Static snapshot · 7:53 PM</div>
+    <div class="preview-banner">Static snapshot · 6:15 PM</div>
 
     <header>
       <div class="bebe" aria-label="Bebe"><img src="bebe.jpg" alt="Bebe" width="56" height="56"></div>
       <div class="greeting">
         <h1>Good morning, Bud</h1>
-        <p class="date">Friday, June 12 · <span class="">Refreshed 13h ago</span></p>
+        <p class="date">Saturday, June 13 · <span class="stale">Last scraped 1d ago</span></p>
       </div>
     </header>
 
@@ -735,14 +827,14 @@
         <div class="card-photo">
           <span class="card-model">12Cilindri</span>
           <span class="card-year">2025</span>
-          <div class="card-badges"><span class="badge badge-new" title="On lot 2d">NEW</span><span class="badge badge-c" title="Stock matches last 8 of VIN">C</span></div>
+          <div class="card-badges"><span class="badge badge-new" title="On lot 3d">NEW</span><span class="badge badge-c" title="Stock matches last 8 of VIN">C</span></div>
           <img class="card-photo-img" src="https://vehicle-images.carscommerce.inc/5dd6-110007612/ZFF10XLA6S0321272/2112e73bdeab72ee2f920db7202477e3.webp" alt="2025 12Cilindri" loading="lazy">
           <span class="card-cue">View listing ↗</span>
         </div>
         <div class="card-body">
           <p class="card-meta">Giallo Triplo Strato · 1,550 mi</p>
           <p class="card-price">$799,995</p>
-          <p class="card-tag">2d on lot · CPO</p>
+          <p class="card-tag">3d on lot · CPO</p>
         </div>
       </a>
     </article>
@@ -751,14 +843,14 @@
         <div class="card-photo">
           <span class="card-model">296 GTS</span>
           <span class="card-year">2025</span>
-          <div class="card-badges"><span class="badge badge-new" title="On lot 2d">NEW</span></div>
+          <div class="card-badges"><span class="badge badge-new" title="On lot 3d">NEW</span></div>
           <img class="card-photo-img" src="https://vehicle-images.carscommerce.inc/44e9-110007612/ZFF01SMA8S0320277/934e2c2070d40a8e439b7606bb084b30.webp" alt="2025 296 GTS" loading="lazy">
           <span class="card-cue">View listing ↗</span>
         </div>
         <div class="card-body">
           <p class="card-meta">Bianco Avus · 90 mi</p>
           <p class="card-price">$429,995</p>
-          <p class="card-tag">2d on lot · CPO</p>
+          <p class="card-tag">3d on lot · CPO</p>
         </div>
       </a>
     </article>
@@ -767,14 +859,14 @@
         <div class="card-photo">
           <span class="card-model">458 Italia</span>
           <span class="card-year">2013</span>
-          <div class="card-badges"><span class="badge badge-new" title="On lot 2d">NEW</span></div>
+          <div class="card-badges"><span class="badge badge-new" title="On lot 3d">NEW</span></div>
           <img class="card-photo-img" src="https://vehicle-images.carscommerce.inc/5770-110007612/ZFF67NFA4D0190735/ab41450005ae521b915e34c7845b5043.webp" alt="2013 458 Italia" loading="lazy">
           <span class="card-cue">View listing ↗</span>
         </div>
         <div class="card-body">
           <p class="card-meta">Grigio Silverstone Metallic · 11,052 mi</p>
           <p class="card-price">$399,995</p>
-          <p class="card-tag">2d on lot · CPO</p>
+          <p class="card-tag">3d on lot · CPO</p>
         </div>
       </a>
     </article>
@@ -783,14 +875,14 @@
         <div class="card-photo">
           <span class="card-model">458 Italia</span>
           <span class="card-year">2011</span>
-          <div class="card-badges"><span class="badge badge-new" title="On lot 2d">NEW</span></div>
+          <div class="card-badges"><span class="badge badge-new" title="On lot 3d">NEW</span></div>
           <img class="card-photo-img" src="https://vehicle-images.carscommerce.inc/a6e9-110007612/ZFF67NFA0B0180412/420eca2eb53d6ab96f20b7e5197c1db0.webp" alt="2011 458 Italia" loading="lazy">
           <span class="card-cue">View listing ↗</span>
         </div>
         <div class="card-body">
           <p class="card-meta">Rosso Corsa · 4,768 mi</p>
           <p class="card-price">$449,995</p>
-          <p class="card-tag">2d on lot · USED</p>
+          <p class="card-tag">3d on lot · USED</p>
         </div>
       </a>
     </article>
@@ -815,14 +907,14 @@
         <div class="card-photo">
           <span class="card-model">488 Pista</span>
           <span class="card-year">2020</span>
-          <div class="card-badges"><span class="badge badge-new" title="On lot 2d">NEW</span></div>
+          <div class="card-badges"><span class="badge badge-new" title="On lot 3d">NEW</span></div>
           <img class="card-photo-img" src="https://vehicle-images.carscommerce.inc/553c-110007612/ZFF91HMA2L0253378/ae880b7e101f9f27827b50a8677c0ef2.webp" alt="2020 488 Pista" loading="lazy">
           <span class="card-cue">View listing ↗</span>
         </div>
         <div class="card-body">
           <p class="card-meta">Rosso Fuoco · 3,440 mi</p>
           <p class="card-price">$1,649,995</p>
-          <p class="card-tag">2d on lot · CPO</p>
+          <p class="card-tag">3d on lot · CPO</p>
         </div>
       </a>
     </article>
@@ -863,14 +955,14 @@
         <div class="card-photo">
           <span class="card-model">488 Spider</span>
           <span class="card-year">2019</span>
-          <div class="card-badges"><span class="badge badge-new" title="On lot 2d">NEW</span></div>
+          <div class="card-badges"><span class="badge badge-new" title="On lot 3d">NEW</span></div>
           <img class="card-photo-img" src="https://vehicle-images.carscommerce.inc/20af-110007612/ZFF80AMA5K0241259/7a55d1ed166d9f960d26455465c4f16f.webp" alt="2019 488 Spider" loading="lazy">
           <span class="card-cue">View listing ↗</span>
         </div>
         <div class="card-body">
           <p class="card-meta">Rosso Corsa · 11,841 mi</p>
           <p class="card-price">$359,895</p>
-          <p class="card-tag">2d on lot · CPO</p>
+          <p class="card-tag">3d on lot · CPO</p>
         </div>
       </a>
     </article>
@@ -879,14 +971,14 @@
         <div class="card-photo">
           <span class="card-model">488 Spider</span>
           <span class="card-year">2019</span>
-          <div class="card-badges"><span class="badge badge-new" title="On lot 2d">NEW</span></div>
+          <div class="card-badges"><span class="badge badge-new" title="On lot 3d">NEW</span></div>
           <img class="card-photo-img" src="https://vehicle-images.carscommerce.inc/20af-110007612/ZFF80AMA9K0246822/7a55d1ed166d9f960d26455465c4f16f.webp" alt="2019 488 Spider" loading="lazy">
           <span class="card-cue">View listing ↗</span>
         </div>
         <div class="card-body">
           <p class="card-meta">Rosso Corsa · 22,354 mi</p>
           <p class="card-price">$319,995</p>
-          <p class="card-tag">2d on lot · CPO</p>
+          <p class="card-tag">3d on lot · CPO</p>
         </div>
       </a>
     </article>
@@ -895,14 +987,14 @@
         <div class="card-photo">
           <span class="card-model">488 Spider</span>
           <span class="card-year">2018</span>
-          <div class="card-badges"><span class="badge badge-new" title="On lot 2d">NEW</span></div>
+          <div class="card-badges"><span class="badge badge-new" title="On lot 3d">NEW</span></div>
           <img class="card-photo-img" src="https://vehicle-images.carscommerce.inc/e4ab-110007612/ZFF80AMA7J0233064/ef7a3cbc3add6e37547b80017ff31ca3.webp" alt="2018 488 Spider" loading="lazy">
           <span class="card-cue">View listing ↗</span>
         </div>
         <div class="card-body">
           <p class="card-meta">Bianco Avus · 14,950 mi</p>
           <p class="card-price">$334,995</p>
-          <p class="card-tag">2d on lot · CPO</p>
+          <p class="card-tag">3d on lot · CPO</p>
         </div>
       </a>
     </article>
@@ -911,14 +1003,14 @@
         <div class="card-photo">
           <span class="card-model">California T</span>
           <span class="card-year">2017</span>
-          <div class="card-badges"><span class="badge badge-new" title="On lot 2d">NEW</span></div>
+          <div class="card-badges"><span class="badge badge-new" title="On lot 3d">NEW</span></div>
           <img class="card-photo-img" src="https://vehicle-images.carscommerce.inc/f5ce-110007612/ZFF77XJA8H0228075/0334a3936384b4ea5ea363b2f8daac6d.webp" alt="2017 California T" loading="lazy">
           <span class="card-cue">View listing ↗</span>
         </div>
         <div class="card-body">
           <p class="card-meta">Azzurro Metallic · 6,808 mi</p>
           <p class="card-price">$264,895</p>
-          <p class="card-tag">2d on lot · CPO</p>
+          <p class="card-tag">3d on lot · CPO</p>
         </div>
       </a>
     </article>
@@ -959,14 +1051,14 @@
         <div class="card-photo">
           <span class="card-model">F8 Tributo</span>
           <span class="card-year">2020</span>
-          <div class="card-badges"><span class="badge badge-new" title="On lot 2d">NEW</span><span class="badge badge-c" title="Stock matches last 8 of VIN">C</span></div>
+          <div class="card-badges"><span class="badge badge-new" title="On lot 3d">NEW</span><span class="badge badge-c" title="Stock matches last 8 of VIN">C</span></div>
           <img class="card-photo-img" src="https://vehicle-images.carscommerce.inc/1418-110007612/ZFF92LLA5L0253473/a8828a383a98ec9298c11163d4e1b960.webp" alt="2020 F8 Tributo" loading="lazy">
           <span class="card-cue">View listing ↗</span>
         </div>
         <div class="card-body">
           <p class="card-meta">Rosso Scuderia · 9,111 mi</p>
           <p class="card-price">$398,995</p>
-          <p class="card-tag">2d on lot · CPO</p>
+          <p class="card-tag">3d on lot · CPO</p>
         </div>
       </a>
     </article>
@@ -975,14 +1067,14 @@
         <div class="card-photo">
           <span class="card-model">Portofino</span>
           <span class="card-year">2019</span>
-          <div class="card-badges"><span class="badge badge-new" title="On lot 2d">NEW</span></div>
+          <div class="card-badges"><span class="badge badge-new" title="On lot 3d">NEW</span></div>
           <img class="card-photo-img" src="https://vehicle-images.carscommerce.inc/a67a-110007612/ZFF89FPA1K0240947/6d87e0d4ccbbdb8b3c5aadf2380ecaab.webp" alt="2019 Portofino" loading="lazy">
           <span class="card-cue">View listing ↗</span>
         </div>
         <div class="card-body">
           <p class="card-meta">7,167 mi</p>
           <p class="card-price">$204,895</p>
-          <p class="card-tag">2d on lot · CPO</p>
+          <p class="card-tag">3d on lot · CPO</p>
         </div>
       </a>
     </article>
@@ -991,14 +1083,14 @@
         <div class="card-photo">
           <span class="card-model">Portofino M</span>
           <span class="card-year">2023</span>
-          <div class="card-badges"><span class="badge badge-new" title="On lot 2d">NEW</span></div>
+          <div class="card-badges"><span class="badge badge-new" title="On lot 3d">NEW</span></div>
           <img class="card-photo-img" src="https://vehicle-images.carscommerce.inc/401c-110007612/ZFF02RPA4P0289019/543112bec11529a57f2f71fcc136860e.webp" alt="2023 Portofino M" loading="lazy">
           <span class="card-cue">View listing ↗</span>
         </div>
         <div class="card-body">
           <p class="card-meta">Blu America · 405 mi</p>
           <p class="card-price">$299,895</p>
-          <p class="card-tag">2d on lot · CPO</p>
+          <p class="card-tag">3d on lot · CPO</p>
         </div>
       </a>
     </article>
@@ -1007,14 +1099,14 @@
         <div class="card-photo">
           <span class="card-model">Portofino M</span>
           <span class="card-year">2022</span>
-          <div class="card-badges"><span class="badge badge-new" title="On lot 2d">NEW</span></div>
+          <div class="card-badges"><span class="badge badge-new" title="On lot 3d">NEW</span></div>
           <img class="card-photo-img" src="https://vehicle-images.carscommerce.inc/39df-110007612/ZFF02RPA0N0272540/48061079ddfe0d37ef46f5c78ea63dba.webp" alt="2022 Portofino M" loading="lazy">
           <span class="card-cue">View listing ↗</span>
         </div>
         <div class="card-body">
           <p class="card-meta">Bianco Avus · 3,410 mi</p>
           <p class="card-price">$279,895</p>
-          <p class="card-tag">2d on lot · CPO</p>
+          <p class="card-tag">3d on lot · CPO</p>
         </div>
       </a>
     </article>
@@ -1166,6 +1258,76 @@
     </section>
 
     
+    <section class="cost-panel">
+      <h2 class="section-title">What it's costing</h2>
+      <div class="cost-summary">
+        <div class="cost-big">
+          <div class="cost-big-label">Today (variable + fixed)</div>
+          <div class="cost-big-value">$1.63</div>
+          <div class="cost-big-note">$0.019 usage + $1.61/day fixed</div>
+        </div>
+        <div class="cost-big">
+          <div class="cost-big-label">Last 30 days (variable)</div>
+          <div class="cost-big-value">$0.019</div>
+          <div class="cost-big-note">Plus $48.40/mo fixed</div>
+        </div>
+      </div>
+
+      <div class="cost-table">
+        <div class="cost-row cost-header">
+          <div class="cost-svc">Service</div>
+          <div class="cost-today">Today</div>
+          <div class="cost-30d">30 days</div>
+          <div class="cost-events">Volume</div>
+        </div>
+        
+      <div class="cost-row">
+        <div class="cost-svc">Embeddings</div>
+        <div class="cost-today">$0.00</div>
+        <div class="cost-30d">$0.00</div>
+        <div class="cost-events">1 calls / 30d</div>
+      </div>
+      <div class="cost-row">
+        <div class="cost-svc">Voice (OpenAI Realtime)</div>
+        <div class="cost-today">$0.00</div>
+        <div class="cost-30d">$0.00</div>
+        <div class="cost-events">0 calls / 30d</div>
+      </div>
+      <div class="cost-row">
+        <div class="cost-svc">SMS</div>
+        <div class="cost-today">$0.019</div>
+        <div class="cost-30d">$0.019</div>
+        <div class="cost-events">1 calls / 30d</div>
+      </div>
+      </div>
+
+      <details class="cost-fixed-details">
+        <summary>Fixed monthly costs: $48.40/mo</summary>
+        <div class="cost-fixed-grid">
+      <div class="cost-fixed-row">
+        <span>Fly Brain Machines</span>
+        <span>$10.00/mo</span>
+      </div>
+      <div class="cost-fixed-row">
+        <span>Supabase Pro</span>
+        <span>$25.00/mo</span>
+      </div>
+      <div class="cost-fixed-row">
+        <span>Supabase Ipv4 Addon</span>
+        <span>$4.00/mo</span>
+      </div>
+      <div class="cost-fixed-row">
+        <span>Twilio Number</span>
+        <span>$1.15/mo</span>
+      </div>
+      <div class="cost-fixed-row">
+        <span>Apple Developer Amortized</span>
+        <span>$8.25/mo</span>
+      </div></div>
+      </details>
+    </section>
+
+    
     <h2 class="section-title">Sold or pulled <span class="count">last 7 days · 12</span></h2>
     <div class="removed-grid">
     <article class="removed-card">
@@ -1178,7 +1340,7 @@
       <div class="card-body">
         <p class="card-meta">Giallo Modena · 6,115 mi</p>
         <p class="card-price strike">$414,895</p>
-        <p class="card-tag">yesterday</p>
+        <p class="card-tag">2d ago</p>
       </div>
     </article>
     <article class="removed-card">
@@ -1191,7 +1353,7 @@
       <div class="card-body">
         <p class="card-meta">Giallo Triplo Strato · 1,550 mi</p>
         <p class="card-price strike">$799,995</p>
-        <p class="card-tag">yesterday</p>
+        <p class="card-tag">2d ago</p>
       </div>
     </article>
     <article class="removed-card">
@@ -1204,7 +1366,7 @@
       <div class="card-body">
         <p class="card-meta">Rosso Libano · 1,220 mi</p>
         <p class="card-price strike">$598,795</p>
-        <p class="card-tag">yesterday</p>
+        <p class="card-tag">2d ago</p>
       </div>
     </article>
     <article class="removed-card">
@@ -1217,7 +1379,7 @@
       <div class="card-body">
         <p class="card-meta">54 mi</p>
         <p class="card-price strike">$368,895</p>
-        <p class="card-tag">yesterday</p>
+        <p class="card-tag">2d ago</p>
       </div>
     </article>
     <article class="removed-card">
@@ -1230,7 +1392,7 @@
       <div class="card-body">
         <p class="card-meta">Blu Corsa · 896 mi</p>
         <p class="card-price strike">$309,895</p>
-        <p class="card-tag">yesterday</p>
+        <p class="card-tag">2d ago</p>
       </div>
     </article>
     <article class="removed-card">
@@ -1243,7 +1405,7 @@
       <div class="card-body">
         <p class="card-meta">Azzurro Metallic · 6,808 mi</p>
         <p class="card-price strike">$269,895</p>
-        <p class="card-tag">yesterday</p>
+        <p class="card-tag">2d ago</p>
       </div>
     </article>
     <article class="removed-card">
@@ -1256,7 +1418,7 @@
       <div class="card-body">
         <p class="card-meta">Bianco Avus · 25,548 mi</p>
         <p class="card-price strike">$104,895</p>
-        <p class="card-tag">yesterday</p>
+        <p class="card-tag">2d ago</p>
       </div>
     </article>
     <article class="removed-card">
@@ -1269,7 +1431,7 @@
       <div class="card-body">
         <p class="card-meta">Grigio Titanio Metallic · 5,407 mi</p>
         <p class="card-price strike">$224,995</p>
-        <p class="card-tag">yesterday</p>
+        <p class="card-tag">2d ago</p>
       </div>
     </article>
     <article class="removed-card">
@@ -1282,7 +1444,7 @@
       <div class="card-body">
         <p class="card-meta">Giallo Modena · 6,115 mi</p>
         <p class="card-price strike">$414,895</p>
-        <p class="card-tag">2d ago</p>
+        <p class="card-tag">3d ago</p>
       </div>
     </article>
     <article class="removed-card">
@@ -1295,7 +1457,7 @@
       <div class="card-body">
         <p class="card-meta">Blu America · 405 mi</p>
         <p class="card-price strike">$299,895</p>
-        <p class="card-tag">2d ago</p>
+        <p class="card-tag">3d ago</p>
       </div>
     </article>
     <article class="removed-card">
@@ -1308,7 +1470,7 @@
       <div class="card-body">
         <p class="card-meta">Bianco Avus · 14,950 mi</p>
         <p class="card-price strike">$334,995</p>
-        <p class="card-tag">2d ago</p>
+        <p class="card-tag">3d ago</p>
       </div>
     </article>
     <article class="removed-card">
@@ -1321,7 +1483,7 @@
       <div class="card-body">
         <p class="card-meta">Bianco Avus · 3,410 mi</p>
         <p class="card-price strike">$273,895</p>
-        <p class="card-tag">2d ago</p>
+        <p class="card-tag">3d ago</p>
       </div>
     </article></div>
 
