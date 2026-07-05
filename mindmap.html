@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lot Map — Palm Beach Ferrari</title>
+  <meta name="description" content="Interactive map of the Palm Beach Ferrari lot.">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#0a0a0a">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #f5f5f7; --bg-card: #ffffff; --bg-elev: #fafafa;
+      --ink: #1d1d1f; --ink-2: #515154; --ink-3: #8a8a8e;
+      --border: rgba(0,0,0,0.08); --border-strong: rgba(0,0,0,0.14);
+      --accent: #d40000; --accent-soft: #ffe5e5; --gold: #b8860b;
+      --line: rgba(0,0,0,0.16);
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+      --shadow-md: 0 8px 24px rgba(0,0,0,0.08);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0a0a0a; --bg-card: #161618; --bg-elev: #1f1f22;
+        --ink: #f5f5f7; --ink-2: #b4b4b8; --ink-3: #6e6e73;
+        --border: rgba(255,255,255,0.08); --border-strong: rgba(255,255,255,0.14);
+        --accent: #ff3b3b; --accent-soft: rgba(255,59,59,0.12); --gold: #d4af37;
+        --line: rgba(255,255,255,0.22);
+        --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+        --shadow-md: 0 8px 24px rgba(0,0,0,0.5);
+      }
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
+      -webkit-font-smoothing: antialiased; background: var(--bg); color: var(--ink);
+      line-height: 1.45; font-size: 15px;
+    }
+    a { color: inherit; text-decoration: none; }
+    header {
+      display: flex; align-items: center; gap: 14px;
+      padding: 18px 22px 14px;
+    }
+    header .title { font-size: 21px; font-weight: 700; letter-spacing: -0.02em; }
+    header .sub { color: var(--ink-3); font-size: 13px; margin-top: 1px; }
+    header .back {
+      margin-left: auto; font-size: 13px; color: var(--ink-2);
+      border: 1px solid var(--border-strong); border-radius: 999px; padding: 6px 14px;
+      background: var(--bg-card); box-shadow: var(--shadow-sm); white-space: nowrap;
+    }
+    .toolbar { display: flex; gap: 8px; padding: 0 22px 12px; }
+    .toolbar button {
+      font: inherit; font-size: 13px; color: var(--ink-2); cursor: pointer;
+      border: 1px solid var(--border-strong); border-radius: 999px; padding: 5px 13px;
+      background: var(--bg-card); box-shadow: var(--shadow-sm);
+    }
+    .toolbar button:active { transform: scale(0.97); }
+
+    /* The map canvas: pans in both directions on touch. */
+    .canvas { overflow: auto; padding: 10px 22px 90px; -webkit-overflow-scrolling: touch; }
+    .map { min-width: max-content; }
+
+    /* Tree structure: nested ULs, horizontal branches drawn with borders. */
+    ul.children { list-style: none; padding-left: 34px; position: relative; }
+    ul.children > li.branch { position: relative; padding: 5px 0 5px 16px; }
+    /* vertical rail */
+    ul.children > li.branch::before {
+      content: ""; position: absolute; left: 0; top: 0; bottom: 0;
+      border-left: 2px solid var(--line);
+    }
+    ul.children > li.branch:first-child::before { top: 50%; }
+    ul.children > li.branch:last-child::before { bottom: 50%; }
+    ul.children > li.branch:only-child::before { display: none; }
+    /* elbow into the node */
+    ul.children > li.branch::after {
+      content: ""; position: absolute; left: 0; top: 50%; width: 16px;
+      border-top: 2px solid var(--line);
+    }
+    ul.children > li.branch:only-child::after { left: -0; width: 16px; }
+
+    details.limb > ul.children { margin-top: 6px; }
+
+    .node {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--bg-card); border: 1px solid var(--border-strong);
+      border-radius: 14px; padding: 8px 14px; box-shadow: var(--shadow-sm);
+      cursor: pointer; user-select: none; -webkit-tap-highlight-color: transparent;
+    }
+    summary.node { list-style: none; }
+    summary.node::-webkit-details-marker { display: none; }
+    summary.node::after {
+      content: "›"; color: var(--ink-3); font-size: 15px;
+      transform: rotate(90deg); transition: transform 0.15s ease;
+    }
+    details:not([open]) > summary.node::after { transform: rotate(0deg); }
+
+    .node.root {
+      background: var(--accent); color: #fff; border-color: transparent;
+      font-weight: 700; font-size: 16px; box-shadow: var(--shadow-md); cursor: default;
+    }
+    .node.group { font-weight: 700; border-left: 4px solid var(--accent); }
+    .node.family { font-weight: 600; }
+    .fam-name { white-space: nowrap; }
+    .since { color: var(--ink-3); font-size: 12px; white-space: nowrap; }
+    .count {
+      background: var(--accent-soft); color: var(--accent);
+      font-size: 12px; font-weight: 700; border-radius: 999px; padding: 1px 8px;
+    }
+    .verify { color: var(--gold); font-weight: 800; }
+
+    .node.car { padding: 7px; gap: 10px; max-width: 340px; }
+    .node.car:hover { border-color: var(--accent); }
+    .thumb {
+      width: 86px; height: 62px; object-fit: cover; border-radius: 9px;
+      background: var(--bg-elev); flex: none; display: block;
+    }
+    .thumb-empty { display: flex; align-items: center; justify-content: center; font-size: 24px; }
+    .car-text { min-width: 0; }
+    .car-title { font-weight: 650; font-size: 14px; white-space: nowrap; }
+    .car-details { color: var(--ink-2); font-size: 12px; white-space: nowrap; }
+    .star { margin-right: 3px; font-size: 12px; }
+    .badge-pending {
+      background: var(--gold); color: #fff; font-size: 10px; font-weight: 700;
+      border-radius: 999px; padding: 1px 7px; vertical-align: 1px;
+    }
+
+    footer { color: var(--ink-3); font-size: 12px; padding: 0 22px 40px; }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <div class="title">Lot Map</div>
+      <div class="sub">Palm Beach Ferrari · Sunday, July 5, 2026 · 42 cars</div>
+    </div>
+    <a class="back" href="index.html">Dashboard →</a>
+  </header>
+  <div class="toolbar">
+    <button id="expand">Expand all</button>
+    <button id="collapse">Collapse all</button>
+  </div>
+  <div class="canvas">
+    <div class="map">
+      <ul class="children" style="padding-left:0;">
+        <li class="branch" style="padding-left:0;">
+          <details class="limb" open>
+            <summary class="node root">Palm Beach Ferrari<span class="count" style="background:rgba(255,255,255,0.25); color:#fff;">42</span></summary>
+            <ul class="children"><li class="branch">
+    <details class="limb" open>
+      <summary class="node group"><span>12-Cylinder</span><span class="count">8</span></summary>
+      <ul class="children"><li class="branch">
+    <details class="limb" open>
+      <summary class="node family"><span class="fam-name">12Cilindri</span><span class="since">since 2024</span><span class="count">1</span></summary>
+      <ul class="children"><li class="branch"><a class="node car" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2025-ferrari-12cilindri-base-rwd-2d-coupe-zff10xla6s0321272/" target="_blank" rel="noopener"><img class="thumb" src="https://vehicle-images.carscommerce.inc/5dd6-110007612/ZFF10XLA6S0321272/2112e73bdeab72ee2f920db7202477e3.webp" alt="12Cilindri" loading="lazy"><div class="car-text"><div class="car-title">2025 12Cilindri</div><div class="car-details">Giallo Triplo Strato · 1,550 mi · Call for price </div></div></a></li></ul>
+    </details>
+  </li><li class="branch">
+    <details class="limb" open>
+      <summary class="node family"><span class="fam-name">F12</span><span class="since">since 2015</span><span class="count">2</span></summary>
+      <ul class="children"><li class="branch"><a class="node car" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2017-ferrari-f12tdf-base-rwd-2d-coupe-zff81bfa0h0220568/" target="_blank" rel="noopener"><img class="thumb" src="https://vehicle-images.carscommerce.inc/492a-110007612/ZFF81BFA0H0220568/34f07815b1191e330392d6c17afdec67.webp" alt="F12 TDF" loading="lazy"><div class="car-text"><div class="car-title">2017 F12 TDF</div><div class="car-details">Rosso Corsa Metallic · 1,051 mi · Call for price </div></div></a></li><li class="branch"><a class="node car" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2017-ferrari-f12-tdf-base-rwd-2d-coupe-zff81bfa7h0224245/" target="_blank" rel="noopener"><img class="thumb" src="https://vehicle-images.carscommerce.inc/1718-110007612/ZFF81BFA7H0224245/b74b6ce1e773c3ec37ba234f14d6be26.webp" alt="F12 TDF" loading="lazy"><div class="car-text"><div class="car-title">2017 F12 TDF</div><div class="car-details">Giallo Triplo Strato · 2,576 mi · $3,499,995 </div></div></a></li></ul>
+    </details>
+  </li><li class="branch">
+    <details class="limb" open>
+      <summary class="node family"><span class="fam-name">812</span><span class="since">since 2019</span><span class="count">4</span></summary>
+      <ul class="children"><li class="branch"><a class="node car" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2023-ferrari-812-gts-base-rwd-2d-convertible-zff97cma3p0300800/" target="_blank" rel="noopener"><img class="thumb" src="https://vehicle-images.carscommerce.inc/e39f-110007612/ZFF97CMA3P0300800/3d0378690bff3f40a5497b4796394c2b.webp" alt="812 GTS" loading="lazy"><div class="car-text"><div class="car-title"><span class="star" title="New arrival">⭐</span>2023 812 GTS</div><div class="car-details">Sanu Silver · 189 mi · Call for price </div></div></a></li><li class="branch"><a class="node car" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2022-ferrari-812-gts-base-rwd-2d-convertible-zff97cma2n0281279/" target="_blank" rel="noopener"><img class="thumb" src="https://vehicle-images.carscommerce.inc/d11e-110007612/ZFF97CMA2N0281279/5f26b0e0dfccbf624805f3af67f84a68.webp" alt="812 GTS" loading="lazy"><div class="car-text"><div class="car-title">2022 812 GTS</div><div class="car-details">Verde Bottiglia Metallic · 7,866 mi · Call for price </div></div></a></li><li class="branch"><a class="node car" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2021-ferrari-812-gts-base-rwd-2d-convertible-zff97cma3m0264196/" target="_blank" rel="noopener"><img class="thumb" src="https://vehicle-images.carscommerce.inc/9757-110007612/ZFF97CMA3M0264196/db2e7e80078e07fb97d6285199a67635.webp" alt="812 GTS" loading="lazy"><div class="car-text"><div class="car-title"><span class="star" title="New arrival">⭐</span>2021 812 GTS</div><div class="car-details">Grigio GTS · 3,031 mi · Call for price </div></div></a></li><li class="branch"><a class="node car" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2021-ferrari-812-gts-base-rwd-2d-convertible-zff97cma0m0263572/" target="_blank" rel="noopener"><img class="thumb" src="https://vehicle-images.carscommerce.inc/216d-110007612/ZFF97CMA0M0263572/4318b099b2d18af02483e94890ba5fc4.webp" alt="812 GTS" loading="lazy"><div class="car-text"><div class="car-title">2021 812 GTS</div><div class="car-details">Rosso Scuderia · 4,083 mi · $949,995 </div></div></a></li></ul>
+    </details>
+  </li><li class="branch">
+    <details class="limb" open>
+      <summary class="node family"><span class="fam-name">Purosangue</span><span class="since">since 2023</span><span class="count">1</span></summary>
+      <ul class="children"><li class="branch"><a class="node car" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2025-ferrari-purosangue-base-awd-4d-sport-utility-zsg06vtaxs0323041/" target="_blank" rel="noopener"><img class="thumb" src="https://vehicle-images.carscommerce.inc/f12d-110007612/ZSG06VTAXS0323041/604fdf11db1c5030f33881bc8daf0226.webp" alt="Purosangue" loading="lazy"><div class="car-text"><div class="car-title"><span class="star" title="New arrival">⭐</span>2025 Purosangue</div><div class="car-details">Bianco Italia · 470 mi · $579,895 </div></div></a></li></ul>
+    </details>
+  </li></ul>
+    </details>
+  </li><li class="branch">
+    <details class="limb" open>
+      <summary class="node group"><span>8-Cylinder</span><span class="count">26</span></summary>
+      <ul class="children"><li class="branch">
+    <details class="limb" open>
+      <summary class="node family"><span class="fam-name">F8</span><span class="since">since 2019</span><span class="count">3</span></summary>
+      <ul class="children"><li class="branch"><a class="node car" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2021-ferrari-f8-tributo-base-rwd-2d-coupe-zff92lla9m0259908/" target="_blank" rel="noopener"><img class="thumb" src="https://vehicle-images.carscommerce.inc/1b3c-110007612/ZFF92LLA9M0259908/73afcdfebd4dfe7f66936f2aa9c99eb0.webp" alt="F8 Tributo" loading="lazy"><div class="car-text"><div class="car-title"><span class="star" title="New arrival">⭐</span>2021 F8 Tributo</div><div class="car-details">Grigio Silverstone Metallic · 3,539 mi · Call for price </div></div></a></li><li class="branch"><a class="node car" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2020-ferrari-f8-tributo-base-rwd-2d-coupe-zff92lla6l0255345/" target="_blank" rel="noopener"><img class="thumb" src="https://vehicle-images.carscommerce.inc/15f9-110007612/ZFF92LLA6L0255345/d865decd0580deb29e6838b1ac803beb.webp" alt="F8 Tributo" loading="lazy"><div class="car-text"><div class="car-title"><span class="star" title="New arrival">⭐</span>2020 F8 Tributo</div><div class="car-details">Rosso Corsa · 8,735 mi · Call for price </div></div></a></li><li class="branch"><a class="node car" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2022-ferrari-f8-spider-base-rwd-2d-convertible-zff93lma7n0282326/" target="_blank" rel="noopener"><img class="thumb" src="https://vehicle-images.carscommerce.inc/e9e0-110007612/ZFF93LMA7N0282326/0a404dcfd0f7334be93fe953a7fe7612.webp" alt="F8 Spider" loading="lazy"><div class="car-text"><div class="car-title">2022 F8 Spider</div><div class="car-details">Bianco Cervino · 8,525 mi · Call for price </div></div></a></li></ul>
+    </details>
+  </li><li class="branch">
+    <details class="limb" open>
+      <summary class="node family"><span class="fam-name">SF90</span><span class="since">since 2020</span><span class="count">1</span></summary>
+      <ul class="children"><li class="branch"><a class="node car" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2024-ferrari-sf90-spider-base-awd-2d-convertible-zff96nma3r0304413/" target="_blank" rel="noopener"><img class="thumb" src="https://vehicle-images.carscommerce.inc/c866-110007612/ZFF96NMA3R0304413/abcf22a9f9e698e0bae7017460a34295.webp" alt="SF90 Spider" loading="lazy"><div class="car-text"><div class="car-title">2024 SF90 Spider</div><div class="car-details">Nero · 1,220 mi · $598,795 </div></div></a></li></ul>
+    </details>
+  </li><li class="branch">
+    <details class="limb" open>
+      <summary class="node family"><span class="fam-name">F430</span><span class="since">since 2007</span><span class="count">2</span></summary>
+      <ul class="children"><li class="branch"><a class="node car" href="https://www.ferrariofpalmbeach.com/inventory/used-2009-ferrari-f430-scuderia-rwd-2d-coupe-zffkw64a090167258/" target="_blank" rel="noopener"><img class="thumb" src="https://vehicle-images.carscommerce.inc/15bb-110007612/ZFFKW64A090167258/066ae7b19a5ec613f80f0add1b02c800.webp" alt="F430 Scuderia" loading="lazy"><div class="car-text"><div class="car-title">2009 F430 Scuderia</div><div class="car-details">Red Scuderia · 3,960 mi · Call for price </div></div></a></li><li class="branch"><a class="node car" href="https://www.ferrariofpalmbeach.com/inventory/used-2008-ferrari-f430-scuderia-rwd-2d-coupe-zffkw64a080163791/" target="_blank" rel="noopener"><img class="thumb" src="https://vehicle-images.carscommerce.inc/433f-110007612/ZFFKW64A080163791/5290e5aeb1d5310fbda9b7cc3d2b8b5e.webp" alt="F430 Scuderia" loading="lazy"><div class="car-text"><div class="car-title">2008 F430 Scuderia</div><div class="car-details">Silver Nurburgring · 7,028 mi · Call for price </div></div></a></li></ul>
+    </details>
+  </li><li class="branch">
+    <details class="limb" open>
+      <summary class="node family"><span class="fam-name">458</span><span class="since">since 2009</span><span class="count">2</span></summary>
+      <ul class="children"><li class="branch"><a class="node car" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2013-ferrari-458-italia-base-rwd-2d-coupe-zff67nfa4d0190735/" target="_blank" rel="noopener"><img class="thumb" src="https://vehicle-images.carscommerce.inc/f3d6-110007612/ZFF67NFA4D0190735/d7eb3d5b8d0e5493c46835f4aff96de0.webp" alt="458 Italia" loading="lazy"><div class="car-text"><div class="car-title">2013 458 Italia</div><div class="car-details">Grigio Silverstone Metallic · 11,060 mi · Call for price </div></div></a></li><li class="branch"><a class="node car" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2015-ferrari-458-speciale-aperta-base-rwd-2d-convertible-zff78vha7f0208615/" target="_blank" rel="noopener"><img class="thumb" src="https://vehicle-images.carscommerce.inc/3ddf-110007612/ZFF78VHA7F0208615/2bec8b351945f26f451dffaf96602617.webp" alt="458 Speciale Aperta" loading="lazy"><div class="car-text"><div class="car-title">2015 458 Speciale Aperta</div><div class="car-details">Rosso Corsa · 549 mi · Call for price </div></div></a></li></ul>
+    </details>
+  </li><li class="branch">
+    <details class="limb" open>
+      <summary class="node family"><span class="fam-name">488</span><span class="since">since 2015</span><span class="count">11</span></summary>
+      <ul class="children"><li class="branch"><a class="node car" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2019-ferrari-488-gtb-base-rwd-2d-coupe-zff79ala7k0239502/" target="_blank" rel="noopener"><img class="thumb" src="https://vehicle-images.carscommerce.inc/5939-110007612/ZFF79ALA7K0239502/bf1b1dc7ac39656fd4994531f9906506.webp" alt="488 GTB" loading="lazy"><div class="car-text"><div class="car-title">2019 488 GTB</div><div class="car-details">Rosso Mugello · 4,315 mi · $329,895 </div></div></a></li><li class="branch"><a class="node car" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2016-ferrari-488-gtb-base-rwd-2d-coupe-zff79ala2h0222924/" target="_blank" rel="noopener"><img class="thumb" src="https://vehicle-images.carscommerce.inc/5753-110007612/ZFF79ALA2H0222924/9e1743699917903b9c8d663b3b0bc919.webp" alt="488 GTB" loading="lazy"><div class="car-text"><div class="car-title">2016 488 GTB</div><div class="car-details">Rosso Corsa · 6,765 mi · $318,995 </div></div></a></li><li class="branch"><a class="node car" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2016-ferrari-488-gtb-base-rwd-2d-coupe-zff79ala7g0214557/" target="_blank" rel="noopener"><img class="thumb" src="https://vehicle-images.carscommerce.inc/4842-110007612/ZFF79ALA7G0214557/9a7a3e2fc1f705b469aadbc5b1d6d984.webp" alt="488 GTB" loading="lazy"><div class="car-text"><div class="car-title">2016 488 GTB</div><div class="car-details">Bianco Avus · 9,708 mi · Call for price </div></div></a></li><li class="branch"><a class="node car" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2018-ferrari-488-spider-base-rwd-2d-convertible-zff80ama5j0235024/" target="_blank" rel="noopener"><img class="thumb" src="https://vehicle-images.carscommerce.inc/98cf-110007612/ZFF80AMA5J0235024/e5f7ef90ffc6e56886f84d0f7331606a.webp" alt="488 Spider" loading="lazy"><div class="car-text"><div class="car-title">2018 488 Spider</div><div class="car-details">Nero DS 1250 · 2,014 mi · Call for price </div></div></a></li><li class="branch"><a class="node car" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2018-ferrari-488-spider-base-rwd-2d-convertible-zff80ama5j0235833/" target="_blank" rel="noopener"><img class="thumb" src="https://vehicle-images.carscommerce.inc/c5d5-110007612/ZFF80AMA5J0235833/77e0c10aaf9000821c92f060b39ed2e0.webp" alt="488 Spider" loading="lazy"><div class="car-text"><div class="car-title">2018 488 Spider</div><div class="car-details">Giallo Modena · 6,115 mi · Call for price </div></div></a></li><li class="branch"><a class="node car" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2018-ferrari-488-spider-base-rwd-2d-convertible-zff80ama6j0233587/" target="_blank" rel="noopener"><img class="thumb" src="https://vehicle-images.carscommerce.inc/1474-110007612/ZFF80AMA6J0233587/2ec5c1cfebae940ef072a4897f70b05f.webp" alt="488 Spider" loading="lazy"><div class="car-text"><div class="car-title">2018 488 Spider</div><div class="car-details">Argento Nurburgring Metallic · 9,250 mi · Call for price </div></div></a></li><li class="branch"><a class="node car" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2017-ferrari-488-spider-base-rwd-2d-convertible-zff80ama6h0228609/" target="_blank" rel="noopener"><img class="thumb" src="https://vehicle-images.carscommerce.inc/20af-110007612/ZFF80AMA6H0228609/7a55d1ed166d9f960d26455465c4f16f.webp" alt="488 Spider" loading="lazy"><div class="car-text"><div class="car-title">2017 488 Spider</div><div class="car-details">Rosso Corsa · 4,810 mi · Call for price </div></div></a></li><li class="branch"><a class="node car" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2017-ferrari-488-spider-base-rwd-2d-convertible-zff80ama6h0226463/" target="_blank" rel="noopener"><img class="thumb" src="https://vehicle-images.carscommerce.inc/a2ee-110007612/ZFF80AMA5H0226463/1f4855e3439865bd8efc793dfcaa2bf1.webp" alt="488 Spider" loading="lazy"><div class="car-text"><div class="car-title"><span class="star" title="New arrival">⭐</span>2017 488 Spider</div><div class="car-details">Blu Tour De France Metallic · 7,944 mi · Call for price </div></div></a></li><li class="branch"><a class="node car" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2016-ferrari-488-spider-base-rwd-2d-convertible-zff80ama6h0231009/" target="_blank" rel="noopener"><img class="thumb" src="https://vehicle-images.carscommerce.inc/15bb-110007612/ZFFEW59A670155533/fa8ff6dfaff652a9e5a4827707bdca1c.webp" alt="488 Spider" loading="lazy"><div class="car-text"><div class="car-title"><span class="star" title="New arrival">⭐</span>2016 488 Spider</div><div class="car-details">Nero DS 1250 · 2,014 mi · Call for price </div></div></a></li><li class="branch"><a class="node car" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2020-ferrari-488-pista-base-rwd-2d-convertible-zff91hma2l0253378/" target="_blank" rel="noopener"><img class="thumb" src="https://vehicle-images.carscommerce.inc/553c-110007612/ZFF91HMA2L0253378/ae880b7e101f9f27827b50a8677c0ef2.webp" alt="488 Pista" loading="lazy"><div class="car-text"><div class="car-title">2020 488 Pista</div><div class="car-details">Rosso Fuoco · 3,440 mi · Call for price </div></div></a></li><li class="branch"><a class="node car" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2020-ferrari-488-pista-base-rwd-2d-convertible-zff91hma6j0237218/" target="_blank" rel="noopener"><img class="thumb" src="https://vehicle-images.carscommerce.inc/8208-110007612/ZFF80AMA6J0237218/ee161920e6ec120c790a36a8ac910751.webp" alt="488 Pista" loading="lazy"><div class="car-text"><div class="car-title">2020 488 Pista</div><div class="car-details">Rosso Fuoco · 15,373 mi · $414,895 </div></div></a></li></ul>
+    </details>
+  </li><li class="branch">
+    <details class="limb" open>
+      <summary class="node family"><span class="fam-name">Portofino</span><span class="since">since 2018</span><span class="count">3</span></summary>
+      <ul class="children"><li class="branch"><a class="node car" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2019-ferrari-portofino-base-rwd-2d-convertible-zff89fpa1k0240947/" target="_blank" rel="noopener"><img class="thumb" src="https://vehicle-images.carscommerce.inc/a67a-110007612/ZFF89FPA1K0240947/6d87e0d4ccbbdb8b3c5aadf2380ecaab.webp" alt="Portofino" loading="lazy"><div class="car-text"><div class="car-title">2019 Portofino</div><div class="car-details">Nero · 7,167 mi · $196,885 </div></div></a></li><li class="branch"><a class="node car" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2022-ferrari-portofino-m-base-rwd-2d-convertible-zff02rpa8n0284063/" target="_blank" rel="noopener"><img class="thumb" src="https://vehicle-images.carscommerce.inc/8a3e-110007612/ZFF02RPA8N0284063/d53eb6843ae7e6dbac8932c1a873dc5b.webp" alt="Portofino M" loading="lazy"><div class="car-text"><div class="car-title">2022 Portofino M</div><div class="car-details">Rosso Corsa · 1,685 mi · $276,895 </div></div></a></li><li class="branch"><a class="node car" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2022-ferrari-portofino-m-base-rwd-2d-convertible-zff02rpa8n0278666/" target="_blank" rel="noopener"><img class="thumb" src="https://vehicle-images.carscommerce.inc/5154-110007612/ZFF02RPA8N0278666/da9b099ca96ae072b78cf1c95d13b206.webp" alt="Portofino M" loading="lazy"><div class="car-text"><div class="car-title">2022 Portofino M</div><div class="car-details">Bianco Avus · 2,989 mi · $274,895 </div></div></a></li></ul>
+    </details>
+  </li><li class="branch">
+    <details class="limb" open>
+      <summary class="node family"><span class="fam-name">Roma</span><span class="since">since 2020</span><span class="count">4</span></summary>
+      <ul class="children"><li class="branch"><a class="node car" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2025-ferrari-roma-base-rwd-2d-convertible-zff09rpa9s0317692/" target="_blank" rel="noopener"><img class="thumb" src="https://vehicle-images.carscommerce.inc/8457-110007612/ZFF09RPA9S0317692/f20c22237211e70f5661319521024b9d.webp" alt="Roma" loading="lazy"><div class="car-text"><div class="car-title">2025 Roma</div><div class="car-details">Blu Corsa · 653 mi · $298,895 </div></div></a></li><li class="branch"><a class="node car" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2025-ferrari-roma-base-rwd-2d-convertible-zff09rpa8s0317344/" target="_blank" rel="noopener"><img class="thumb" src="https://vehicle-images.carscommerce.inc/abad-110007612/ZFF09RPA8S0317344/cf543db58fb39ceb52a004789f90017a.webp" alt="Roma" loading="lazy"><div class="car-text"><div class="car-title">2025 Roma</div><div class="car-details">Blu Corsa · 896 mi · $294,895 </div></div></a></li><li class="branch"><a class="node car" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2025-ferrari-roma-base-rwd-2d-convertible-zff09rpa6s0318380/" target="_blank" rel="noopener"><img class="thumb" src="https://vehicle-images.carscommerce.inc/6978-110007612/ZFF09RPA6S0318380/cbb6f6d15081a13e86673de7ec7d514e.webp" alt="Roma" loading="lazy"><div class="car-text"><div class="car-title">2025 Roma</div><div class="car-details">Blu Corsa · 1,220 mi · $314,895 </div></div></a></li><li class="branch"><a class="node car" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2021-ferrari-roma-base-rwd-2d-coupe-zff98rnaxm0263240/" target="_blank" rel="noopener"><img class="thumb" src="https://vehicle-images.carscommerce.inc/c195-110007612/ZFF98RNAXM0263240/f011eecd9cc7115cebb6b4235ad1025c.webp" alt="Roma" loading="lazy"><div class="car-text"><div class="car-title"><span class="star" title="New arrival">⭐</span>2021 Roma</div><div class="car-details">Blu Tour de France Metallic · 8,646 mi · $199,995 </div></div></a></li></ul>
+    </details>
+  </li></ul>
+    </details>
+  </li><li class="branch">
+    <details class="limb" open>
+      <summary class="node group"><span>6-Cylinder</span><span class="count">5</span></summary>
+      <ul class="children"><li class="branch">
+    <details class="limb" open>
+      <summary class="node family"><span class="fam-name">296</span><span class="since">since 2021</span><span class="count">5</span></summary>
+      <ul class="children"><li class="branch"><a class="node car" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2024-ferrari-296-gtb-base-rear-wheel-drive-2d-coupe-zff99sla9r0305881/" target="_blank" rel="noopener"><img class="thumb" src="https://vehicle-images.carscommerce.inc/15e1-110007612/ZFF99SLA9R0305881/c64a1a4736c97c51123144b283a6a364.webp" alt="296 GTB" loading="lazy"><div class="car-text"><div class="car-title">2024 296 GTB</div><div class="car-details">Bianco Avus · 202 mi · $379,895 </div></div></a></li><li class="branch"><a class="node car" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2024-ferrari-296-gtb-base-rwd-2d-coupe-zff99sla8r0311445/" target="_blank" rel="noopener"><img class="thumb" src="https://vehicle-images.carscommerce.inc/209e-110007612/ZFF99SLA8R0311445/6a3162810374babe0c0c7b521c1cbbeb.webp" alt="296 GTB" loading="lazy"><div class="car-text"><div class="car-title">2024 296 GTB</div><div class="car-details">Argento Nurburgring Metallic · 425 mi · $313,895 </div></div></a></li><li class="branch"><a class="node car" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2024-ferrari-296-gtb-base-rwd-2d-coupe-zff99sla4r0305870/" target="_blank" rel="noopener"><img class="thumb" src="https://vehicle-images.carscommerce.inc/3617-110007612/ZFF99SLA4R0305870/4a0d705865a449f53694c3859f610c7f.webp" alt="296 GTB" loading="lazy"><div class="car-text"><div class="car-title">2024 296 GTB</div><div class="car-details">Bianco Avus · 802 mi · $329,895 </div></div></a></li><li class="branch"><a class="node car" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2022-ferrari-296-gtb-base-rwd-2d-coupe-zff99sla4n0285100/" target="_blank" rel="noopener"><img class="thumb" src="https://vehicle-images.carscommerce.inc/5572-110007612/ZFF99SLA4N0285100/d02c1496cab9037ad95345b4e5a6426f.webp" alt="296 GTB" loading="lazy"><div class="car-text"><div class="car-title">2022 296 GTB</div><div class="car-details">Grigio Silverstone Opaco · 3,812 mi · $359,895 </div></div></a></li><li class="branch"><a class="node car" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2023-ferrari-296-gts-rwd-2d-convertible-zff01sma5p0290923/" target="_blank" rel="noopener"><img class="thumb" src="https://vehicle-images.carscommerce.inc/4dc7-110007612/ZFF01SMA5P0290923/95f0d04efb5aaae8db09d03796585def.webp" alt="296 GTS" loading="lazy"><div class="car-text"><div class="car-title"><span class="star" title="New arrival">⭐</span>2023 296 GTS</div><div class="car-details">Rosso Imola · 1,975 mi · $389,995 </div></div></a></li></ul>
+    </details>
+  </li></ul>
+    </details>
+  </li><li class="branch">
+    <details class="limb" open>
+      <summary class="node group"><span>California</span><span class="count">3</span></summary>
+      <ul class="children"><li class="branch">
+    <details class="limb" open>
+      <summary class="node family"><span class="fam-name">California</span><span class="since">since 2009</span><span class="count">3</span></summary>
+      <ul class="children"><li class="branch"><a class="node car" href="https://www.ferrariofpalmbeach.com/inventory/used-2010-ferrari-california-base-rwd-2d-convertible-zff65lha2a0174195/" target="_blank" rel="noopener"><img class="thumb" src="https://vehicle-images.carscommerce.inc/a9dc-110007612/ZFF65LHA2A0174195/18bafc4ed4c85b06b37035a72c180602.webp" alt="California" loading="lazy"><div class="car-text"><div class="car-title">2010 California</div><div class="car-details">Bianco Avus · 25,548 mi · $97,895 </div></div></a></li><li class="branch"><a class="node car" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2017-ferrari-california-t-rwd-2d-convertible-zff77xja8h0228075/" target="_blank" rel="noopener"><img class="thumb" src="https://vehicle-images.carscommerce.inc/f5ce-110007612/ZFF77XJA8H0228075/0334a3936384b4ea5ea363b2f8daac6d.webp" alt="California T" loading="lazy"><div class="car-text"><div class="car-title">2017 California T</div><div class="car-details">Azzurro Metallic · 6,808 mi · $249,895 </div></div></a></li><li class="branch"><a class="node car" href="https://www.ferrariofpalmbeach.com/inventory/certified-used-2015-ferrari-california-t-rwd-2d-convertible-zff77xja9f0210861/" target="_blank" rel="noopener"><img class="thumb" src="https://vehicle-images.carscommerce.inc/55a1-110007612/ZFF77XJA9F0210861/1d55dd3ead7d0535ee909fd929b75ec6.webp" alt="California T" loading="lazy"><div class="car-text"><div class="car-title">2015 California T</div><div class="car-details">Blu Tour De France Metallic · 5,277 mi · $158,895 </div></div></a></li></ul>
+    </details>
+  </li></ul>
+    </details>
+  </li></ul>
+          </details>
+        </li>
+      </ul>
+    </div>
+  </div>
+  <footer>Tap a branch to open or close it. Tap a car to see its listing. Updated Sunday, July 5, 2026.</footer>
+  <script>
+    document.getElementById("expand").onclick = () =>
+      document.querySelectorAll("details.limb").forEach((d) => (d.open = true));
+    // Keep the root limb open (it holds the whole map); close everything else.
+    document.getElementById("collapse").onclick = () =>
+      document.querySelectorAll("details.limb").forEach((d) => {
+        if (!d.querySelector(":scope > summary.node.root")) d.open = false;
+      });
+  </script>
+</body>
+</html>
