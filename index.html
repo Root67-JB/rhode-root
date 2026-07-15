@@ -86,6 +86,13 @@
     .gauge-fill.warn { background: var(--warn); }
     .gauge-fill.crit { background: var(--crit); }
     .gauge-sub { color: var(--ink-3); font-size: 12px; margin-top: 4px; }
+    .eval-badge { font-size: 11.5px; font-weight: 750; border-radius: 999px; padding: 2px 9px; margin-left: 6px; }
+    .eval-badge.ok { background: rgba(10,124,44,0.14); color: var(--ok); }
+    .eval-badge.fail { background: rgba(179,0,0,0.14); color: var(--crit); }
+    .eval-dots { display: flex; gap: 5px; margin: 6px 0 2px; }
+    .eval-dot { width: 12px; height: 12px; border-radius: 4px; display: inline-block; }
+    .eval-dot.ok { background: var(--ok); }
+    .eval-dot.fail { background: var(--crit); }
 
     .fine { color: var(--ink-3); font-size: 12px; line-height: 1.6; margin-top: 26px; }
     .fine li { margin-left: 18px; }
@@ -220,19 +227,27 @@
     </table>
   </div>
 
-  <h2>Utilization</h2>
+  <h2>Utilization &amp; health</h2>
   <div class="card">
     <div class="gauge">
-    <div class="gauge-head"><span>Firecrawl credits</span><span class="dim">260 / 100,000 credits · 0%</span></div>
+    <div class="gauge-head">
+      <span>Inventory data accuracy <span class="eval-badge ok">PASS 100.0</span></span>
+      <span class="dim">Jul 15, 12:56 PM · target ≥ 99 · streak 1</span>
+    </div>
+    <div class="eval-dots"><span class="eval-dot fail" title="7/15/2026 — 82.5"></span><span class="eval-dot ok" title="7/15/2026 — 100.0"></span></div>
+    <div class="gauge-sub">Site coverage 100% · hard ghosts 0 · fabrications 0 · duplicates 0 — audited daily against the dealer site's own listing links.</div>
+  </div>
+    <div class="gauge">
+    <div class="gauge-head"><span>Firecrawl credits</span><span class="dim">320 / 100,000 credits · 0%</span></div>
     <div class="gauge-track"><div class="gauge-fill ok" style="width:0%"></div></div>
     <div class="gauge-sub">billing period Jul 11 – Aug 11</div>
   </div><div class="gauge">
-    <div class="gauge-head"><span>Firecrawl extract tokens</span><span class="dim">3,900 / 1,500,000 tokens · 0%</span></div>
+    <div class="gauge-head"><span>Firecrawl extract tokens</span><span class="dim">4,800 / 1,500,000 tokens · 0%</span></div>
     <div class="gauge-track"><div class="gauge-fill ok" style="width:0%"></div></div>
     
-  </div><div class="gauge-sub" style="margin-top:2px;">Credits by month — May 2026: 50 · Jun 2026: 4,571 · Jul 2026: 4,942</div>
+  </div><div class="gauge-sub" style="margin-top:2px;">Credits by month — May 2026: 50 · Jun 2026: 4,571 · Jul 2026: 5,002</div>
     <div class="gauge">
-    <div class="gauge-head"><span>Supabase database</span><span class="dim">258.6 / 8,192 MB · 3%</span></div>
+    <div class="gauge-head"><span>Supabase database</span><span class="dim">258.7 / 8,192 MB · 3%</span></div>
     <div class="gauge-track"><div class="gauge-fill ok" style="width:3%"></div></div>
     <div class="gauge-sub">against the Pro plan's 8 GB included storage</div>
   </div>
@@ -244,7 +259,7 @@
       <li>Subscription figures are list prices from <code>services/costing/pricing.mjs</code>, charged in full for each month a service was active — not invoice reads. Firecrawl's plan price is an estimate (Hobby tier, 5,000 credits/mo); confirm against the card statement.</li>
       <li>Firecrawl spend is the flat plan price; the credit gauges show utilization within the plan, not extra dollars.</li>
       <li>Free tiers in use (no cost rows): GitHub Pages, Google Calendar API, Meta Wearables SDK, Codemagic free minutes.</li>
-      <li>Page regenerates daily at ~07:05 with the Lot Map. Generated 2026-07-15T15:11:56.460Z.</li>
+      <li>Page regenerates daily at ~07:05 with the Lot Map. Generated 2026-07-15T16:56:42.128Z.</li>
     </ul>
   </div>
 </body>
